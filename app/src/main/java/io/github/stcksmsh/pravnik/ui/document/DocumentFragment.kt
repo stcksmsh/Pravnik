@@ -86,6 +86,8 @@ class DocumentFragment : Fragment() {
             tab.text = titles[pos]
         }.attach()
         binding.outlineBtn.setOnClickListener { openOutline() }
+    }
+
     private fun openOutline() {
         val ctx = requireContext()
         val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(ctx)
@@ -102,8 +104,6 @@ class DocumentFragment : Fragment() {
         }
         dialog.setContentView(v)
         dialog.show()
-    }
-
     }
 
 

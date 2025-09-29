@@ -66,9 +66,8 @@ class HomeFragment : Fragment() {
         binding.recentStarredList.layoutManager = LinearLayoutManager(requireContext())
 
         val queriesAdapter = SimpleTextAdapter(HomeBinders.query) { q ->
-            val action = HomeFragmentDirections.actionHomeToSearch()
-            findNavController().navigate(action)
-            // TODO: pass query as shared ViewModel or nav arg if supported
+            val args = android.os.Bundle().apply { putString("initialQuery", q.query) }
+            findNavController().navigate(R.id.searchFragment, args)
         }
         val bookmarksAdapter = SimpleTextAdapter(HomeBinders.bookmark) { b ->
             val action = HomeFragmentDirections.actionHomeToDocument(b.docId, b.unitAnchor)
@@ -91,16 +90,36 @@ class HomeFragment : Fragment() {
             vm.docs.collectLatest { docs -> binding.emptyView.isVisible = docs.isEmpty() }
         }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            vm.recentQueries.collectLatest { queriesAdapter.submitList(it) }
+            vm.recentQueries.collectLatest {
+                binding.emptySavedSearches.isVisible = it.isEmpty()
+                binding.sectionSavedSearches.isVisible = it.isNotEmpty()
+                binding.recentSearchesList.isVisible = it.isNotEmpty()
+                queriesAdapter.submitList(it)
+            }
         }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            vm.recentBookmarks.collectLatest { bookmarksAdapter.submitList(it) }
+            vm.recentBookmarks.collectLatest {
+                binding.emptyBookmarks.isVisible = it.isEmpty()
+                binding.sectionBookmarks.isVisible = it.isNotEmpty()
+                binding.recentBookmarksList.isVisible = it.isNotEmpty()
+                bookmarksAdapter.submitList(it)
+            }
         }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            vm.recentHistory.collectLatest { historyAdapter.submitList(it) }
+            vm.recentHistory.collectLatest {
+                binding.emptyHistory.isVisible = it.isEmpty()
+                binding.sectionHistory.isVisible = it.isNotEmpty()
+                binding.recentHistoryList.isVisible = it.isNotEmpty()
+                historyAdapter.submitList(it)
+            }
         }
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            vm.starredDocs.collectLatest { starredAdapter.submitList(it) }
+            vm.starredDocs.collectLatest {
+                binding.emptyStarred.isVisible = it.isEmpty()
+                binding.sectionStarred.isVisible = it.isNotEmpty()
+                binding.recentStarredList.isVisible = it.isNotEmpty()
+                starredAdapter.submitList(it)
+            }
         }
     }
 

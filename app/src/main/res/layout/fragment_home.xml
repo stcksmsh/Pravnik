@@ -36,6 +36,18 @@
         <include
             android:id="@+id/sectionSavedSearches"
             layout="@layout/item_home_section_header" />
+
+        <TextView
+            android:id="@+id/emptySavedSearches"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="No recent searches"
+            android:visibility="gone"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recentSearchesList"
             android:layout_width="match_parent"
@@ -46,6 +58,18 @@
         <include
             android:id="@+id/sectionBookmarks"
             layout="@layout/item_home_section_header" />
+
+        <TextView
+            android:id="@+id/emptyBookmarks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="No bookmarks yet"
+            android:visibility="gone"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recentBookmarksList"
             android:layout_width="match_parent"
@@ -56,6 +80,18 @@
         <include
             android:id="@+id/sectionHistory"
             layout="@layout/item_home_section_header" />
+
+        <TextView
+            android:id="@+id/emptyHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="No recent history"
+            android:visibility="gone"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recentHistoryList"
             android:layout_width="match_parent"
@@ -66,6 +102,18 @@
         <include
             android:id="@+id/sectionStarred"
             layout="@layout/item_home_section_header" />
+
+        <TextView
+            android:id="@+id/emptyStarred"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="No starred documents"
+            android:visibility="gone"/>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recentStarredList"
             android:layout_width="match_parent"

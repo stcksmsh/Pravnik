@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
@@ -47,6 +48,13 @@ class DocumentFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val doc = documentsRepo.get(args.docId)
             binding.title.text = doc?.title ?: args.docId
+        }
+        parentFragmentManager.setFragmentResultListener("doc_anchor", viewLifecycleOwner) { _, bundle ->
+            val anchor = bundle.getString("anchor").orEmpty()
+            if (anchor.isNotEmpty()) {
+                val action = DocumentFragmentDirections.actionDocumentSelf(args.docId, anchor)
+                findNavController().navigate(action)
+            }
         }
     }
 

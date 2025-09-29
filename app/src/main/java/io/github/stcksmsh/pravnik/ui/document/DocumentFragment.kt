@@ -18,6 +18,7 @@ import io.github.stcksmsh.pravnik.databinding.FragmentDocumentBinding
 import io.github.stcksmsh.pravnik.domain.repo.DefinitionsRepo
 import io.github.stcksmsh.pravnik.domain.repo.TariffsRepo
 import io.github.stcksmsh.pravnik.domain.repo.UnitsRepo
+import io.github.stcksmsh.pravnik.domain.repo.DocumentsRepo
 import io.github.stcksmsh.pravnik.ui.util.RenderUtils
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -32,6 +33,7 @@ class DocumentFragment : Fragment() {
     @Inject lateinit var unitsRepo: UnitsRepo
     @Inject lateinit var definitionsRepo: DefinitionsRepo
     @Inject lateinit var tariffsRepo: TariffsRepo
+    @Inject lateinit var documentsRepo: DocumentsRepo
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDocumentBinding.inflate(inflater, container, false)
@@ -41,7 +43,11 @@ class DocumentFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupTabs()
-        renderRead(args.docId, args.anchor)
+        // Update title from document
+        viewLifecycleOwner.lifecycleScope.launch {
+            val doc = documentsRepo.get(args.docId)
+            binding.title.text = doc?.title ?: args.docId
+        }
     }
 
     private fun setupTabs() {
@@ -76,41 +82,6 @@ class DocumentFragment : Fragment() {
         }
     }
 
-    private fun renderRead(docId: String, anchor: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val unit = if (anchor.isNotEmpty()) unitsRepo.getByAnchor(docId, anchor) else null
-            val title = unit?.title ?: "${'$'}docId#${'$'}anchor"
-            binding.title.text = title
-            val bodyText = unit?.text ?: sampleText()
-            val blocks = RenderUtils.parseUnitText(bodyText)
-            val sb = StringBuilder()
-            blocks.forEachIndexed { idx, b ->
-                if (b.body.isNotBlank()) sb.append(b.body.trim()).append('\n')
-                if (b.points.isNotEmpty()) b.points.forEach { sb.append(it).append('\n') }
-                if (b.bullets.isNotEmpty()) b.bullets.forEach { sb.append(it).append('\n') }
-                if (idx < blocks.lastIndex) sb.append('\n')
-            }
-            val underlined = RenderUtils.underlineTerms(sb.toString(), listOf("pojam", "definicija"))
-            val highlighted = RenderUtils.highlightQuery(underlined.toString(), RenderUtils.tokenizeQuery(anchor), 0x443498DB.toInt())
-            val withRefs = RenderUtils.applyClickableArticleRefs(highlighted.toString()) { number ->
-                object : android.text.style.ClickableSpan() {
-                    override fun onClick(widget: View) {
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            val target = unitsRepo.getByNumber(docId, number)
-                            if (target != null) renderRead(docId, target.anchor) else Toast.makeText(requireContext(), "Target čl. ${'$'}number not found", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-            // Place the read text into a simple TextView within a placeholder fragment container
-            // For now, we reuse the fragment's own view by inflating a minimal layout
-            val tv = TextView(requireContext())
-            tv.movementMethod = LinkMovementMethod.getInstance()
-            tv.text = withRefs
-            // Replace the first page's content view using viewPager current fragment later; here we set title only
-            binding.title.text = title
-        }
-    }
 
     private fun sampleText(): String = """
         Član 1
@@ -128,7 +99,4 @@ class DocumentFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    class ReadTab : Fragment()
-    class SimpleListTab : Fragment()
 }

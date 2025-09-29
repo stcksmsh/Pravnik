@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.core.view.children
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -30,32 +31,37 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         vm.load()
+
+        // Section headers and See all
+        binding.sectionSavedSearches.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_saved_searches)
+        binding.sectionBookmarks.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_bookmarks)
+        binding.sectionHistory.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_history)
+        binding.sectionStarred.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_starred)
+
+        binding.sectionSavedSearches.findViewById<android.view.View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToSavedSearches()) }
+        binding.sectionBookmarks.findViewById<android.view.View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToBookmarks()) }
+        binding.sectionHistory.findViewById<android.view.View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToHistory()) }
+        binding.sectionStarred.findViewById<android.view.View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToStarred()) }
+
+        // Search box opens full search
+        binding.editSearch.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) findNavController().navigate(HomeFragmentDirections.actionHomeToSearch()) }
+
+        // Type chips
+        val cg = binding.typeChips
+        cg.removeAllViews()
+        listOf(DocumentType.LAW, DocumentType.CONSTITUTION, DocumentType.BYLAW, DocumentType.CASE, DocumentType.PRACTICE).forEach { t ->
+            val chip = layoutInflater.inflate(R.layout.view_choice_chip, cg, false) as com.google.android.material.chip.Chip
+            chip.text = t.name
+            chip.isCheckable = true
+            chip.isChecked = true
+            cg.addView(chip)
+        }
+
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             vm.docs.collectLatest { docs ->
                 binding.emptyView.isVisible = docs.isEmpty()
-                binding.docsCount.text = getString(R.string.home_docs_count, docs.size)
             }
         }
-        binding.btnOpenSearch.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToSearch()) }
-        listOf(
-            binding.chipConstitution to DocumentType.CONSTITUTION,
-            binding.chipLaw to DocumentType.LAW,
-            binding.chipBylaw to DocumentType.BYLAW,
-            binding.chipCase to DocumentType.CASE,
-            binding.chipPractice to DocumentType.PRACTICE,
-        ).forEach { (chip, type) ->
-            chip.setOnCheckedChangeListener { _, _ -> vm.toggleType(type) }
-        }
-        binding.btnStarred.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToStarred()) }
-        binding.btnHistory.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToHistory()) }
-        binding.btnNotes.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToNotes()) }
-        binding.btnBookmarks.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToBookmarks()) }
-        binding.btnCollections.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToCollections()) }
-        binding.btnSavedSearches.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToSavedSearches()) }
-        binding.btnImportExport.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToImportExport()) }
-        binding.btnTemplates.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToTemplates()) }
-        binding.btnChecklists.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToChecklists()) }
-        binding.btnDockets.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToDockets()) }
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

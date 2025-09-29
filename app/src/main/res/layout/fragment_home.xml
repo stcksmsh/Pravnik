@@ -58,6 +58,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:imeOptions="actionSearch"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="vertical">
+
+        <Button android:id="@+id/btnStarred" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_starred" />
+        <Button android:id="@+id/btnHistory" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_history" />
+        <Button android:id="@+id/btnNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_notes" />
+        <Button android:id="@+id/btnBookmarks" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_bookmarks" />
+        <Button android:id="@+id/btnCollections" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_collections" />
+        <Button android:id="@+id/btnSavedSearches" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_saved_searches" />
+        <Button android:id="@+id/btnImportExport" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_import_export" />
+        <Button android:id="@+id/btnTemplates" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_templates" />
+        <Button android:id="@+id/btnChecklists" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_checklists" />
+        <Button android:id="@+id/btnDockets" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_dockets" />
+    </LinearLayout>
+
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button

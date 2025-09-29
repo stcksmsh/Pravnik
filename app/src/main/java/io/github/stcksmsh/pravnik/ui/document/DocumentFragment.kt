@@ -77,9 +77,25 @@ class DocumentFragment : Fragment() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, pos ->
             tab.text = titles[pos]
         }.attach()
-        binding.outlineBtn.setOnClickListener {
-            // TODO: open outline drawer/sheet
+        binding.outlineBtn.setOnClickListener { openOutline() }
+    private fun openOutline() {
+        val ctx = requireContext()
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(ctx)
+        val v = layoutInflater.inflate(R.layout.bottom_sheet_outline, null)
+        val list = v.findViewById<android.widget.ListView>(R.id.outlineList)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val labels = unitsRepo.listLabels(args.docId)
+            list.adapter = android.widget.ArrayAdapter(ctx, android.R.layout.simple_list_item_1, labels.map { it.label })
+            list.setOnItemClickListener { _, _, position, _ ->
+                val anchor = labels[position].anchor
+                parentFragmentManager.setFragmentResult("doc_anchor", Bundle().apply { putString("anchor", anchor) })
+                dialog.dismiss()
+            }
         }
+        dialog.setContentView(v)
+        dialog.show()
+    }
+
     }
 
 

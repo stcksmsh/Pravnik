@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item android:id="@+id/homeFragment" android:title="@string/nav_home" />
+        <item android:id="@+id/searchFragment" android:title="@string/nav_search" />
+        <item android:id="@+id/starredFragment" android:title="@string/nav_starred" />
+        <item android:id="@+id/historyFragment" android:title="@string/nav_history" />
+        <item android:id="@+id/notesListFragment" android:title="@string/nav_notes" />
+        <item android:id="@+id/bookmarksFragment" android:title="@string/nav_bookmarks" />
+        <item android:id="@+id/collectionsFragment" android:title="@string/nav_collections" />
+        <item android:id="@+id/savedSearchesFragment" android:title="@string/nav_saved_searches" />
+        <item android:id="@+id/templatesFragment" android:title="@string/nav_templates" />
+        <item android:id="@+id/checklistsFragment" android:title="@string/nav_checklists" />
+        <item android:id="@+id/docketsFragment" android:title="@string/nav_dockets" />
+        <item android:id="@+id/importExportFragment" android:title="@string/nav_import_export" />
+    </group>
+</menu>

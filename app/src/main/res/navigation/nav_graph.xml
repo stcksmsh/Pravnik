@@ -29,6 +29,9 @@
             android:defaultValue="" />
         <deepLink
             app:uri="pravnik://doc/{docId}#${anchor}" />
+        <action
+            android:id="@+id/action_document_self"
+            app:destination="@id/documentFragment" />
     </fragment>
 
     <fragment

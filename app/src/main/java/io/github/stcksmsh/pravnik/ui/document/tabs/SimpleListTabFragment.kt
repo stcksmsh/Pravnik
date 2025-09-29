@@ -43,7 +43,7 @@ class SimpleListTabFragment : Fragment() {
             val items: List<String> = when (mode) {
                 "defs" -> definitionsRepo.listForDoc(docId).map { it.term + ": " + it.text }
                 "tariffs" -> tariffsRepo.listForDoc(docId).map { (it.title ?: it.key) + (it.amount?.let { a -> " — $a" } ?: "") }
-                "notes" -> notesRepo.listForDoc(docId).map { it.text }
+                "notes" -> notesRepo.listForDoc(docId).map { it.body }
                 "meta" -> {
                     val case = caseMetaRepo.get(docId)
                     val practice = practiceMetaRepo.get(docId)
@@ -70,6 +70,10 @@ class SimpleListTabFragment : Fragment() {
                 else -> emptyList()
             }
             listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+
+        }
+    }
+    
     private fun promptAddNote(docId: String) {
         val ctx = requireContext()
         val input = android.widget.EditText(ctx).apply { hint = getString(R.string.note_hint) }
@@ -99,8 +103,5 @@ class SimpleListTabFragment : Fragment() {
             }
             .setNegativeButton(android.R.string.cancel, null)
             .show()
-    }
-
-        }
     }
 }

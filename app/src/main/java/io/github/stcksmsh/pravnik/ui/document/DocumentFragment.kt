@@ -20,6 +20,8 @@ import io.github.stcksmsh.pravnik.domain.repo.DefinitionsRepo
 import io.github.stcksmsh.pravnik.domain.repo.TariffsRepo
 import io.github.stcksmsh.pravnik.domain.repo.UnitsRepo
 import io.github.stcksmsh.pravnik.domain.repo.DocumentsRepo
+import io.github.stcksmsh.pravnik.ui.document.tabs.ReadTabFragment
+import io.github.stcksmsh.pravnik.ui.document.tabs.SimpleListTabFragment
 import io.github.stcksmsh.pravnik.ui.util.RenderUtils
 import javax.inject.Inject
 import kotlinx.coroutines.launch

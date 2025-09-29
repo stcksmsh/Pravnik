@@ -7,9 +7,10 @@ import javax.inject.Inject
 import androidx.hilt.work.HiltWorkerFactory
 
 @HiltAndroidApp
-class PravnikApp : Application(), Configuration.Provider {
-    @Inject lateinit var workerFactory: HiltWorkerFactory
-    override fun getWorkManagerConfiguration(): Configuration =
-        Configuration.Builder().setWorkerFactory(workerFactory).build()
+class PravnikApp @Inject constructor(
+    val workerFactory: HiltWorkerFactory
+): Application(), Configuration.Provider {
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 }
 

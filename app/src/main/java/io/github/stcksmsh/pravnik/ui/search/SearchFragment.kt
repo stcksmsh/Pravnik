@@ -37,7 +37,7 @@ class SearchFragment : Fragment() {
 
     private val adapter = ResultsAdapter { row ->
         // Navigate to document view on click
-        val action = SearchFragmentDirections.actionSearchFragmentToDocumentFragment(row.docId, row.anchor)
+        val action = SearchFragmentDirections.actionSearchToDocument(row.docId, row.anchor)
         findNavController().navigate(action)
     }
     private var job: Job? = null
@@ -99,7 +99,7 @@ class SearchFragment : Fragment() {
         )
     }
 
-    private fun renderFacets(res: io.github.stcksmsh.pravnik.domain.repo.SearchResult, filters: SearchFilters) {
+    private suspend fun renderFacets(res: io.github.stcksmsh.pravnik.domain.repo.SearchResult, filters: SearchFilters) {
         fun chipGroup(group: com.google.android.material.chip.ChipGroup, entries: List<Pair<String,String>>, singleSelection: Boolean = true) {
             group.removeAllViews()
             group.isSingleSelection = singleSelection

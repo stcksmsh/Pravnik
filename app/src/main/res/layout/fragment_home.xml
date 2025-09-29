@@ -45,7 +45,7 @@
             android:paddingEnd="16dp"
             android:paddingTop="4dp"
             android:paddingBottom="8dp"
-            android:text="No recent searches"
+            android:text="@string/empty_recent_searches"
             android:visibility="gone"/>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -67,7 +67,7 @@
             android:paddingEnd="16dp"
             android:paddingTop="4dp"
             android:paddingBottom="8dp"
-            android:text="No bookmarks yet"
+            android:text="@string/empty_bookmarks"
             android:visibility="gone"/>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -89,7 +89,7 @@
             android:paddingEnd="16dp"
             android:paddingTop="4dp"
             android:paddingBottom="8dp"
-            android:text="No recent history"
+            android:text="@string/empty_history"
             android:visibility="gone"/>
 
         <androidx.recyclerview.widget.RecyclerView
@@ -111,7 +111,7 @@
             android:paddingEnd="16dp"
             android:paddingTop="4dp"
             android:paddingBottom="8dp"
-            android:text="No starred documents"
+            android:text="@string/empty_starred"
             android:visibility="gone"/>
 
         <androidx.recyclerview.widget.RecyclerView

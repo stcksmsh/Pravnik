@@ -279,14 +279,15 @@ class CollectionsRepoImpl(private val db: AppDb) : CollectionsRepo {
 }
 
 class NotesRepoImpl(private val db: AppDb) : NotesRepo {
+    override suspend fun listAll() = withContext(Dispatchers.IO) {
+        db.noteDao().listAll().map { it.toDomain() }
+    }
     override suspend fun listForDoc(docId: String) = withContext(Dispatchers.IO) {
         db.noteDao().listForDoc(docId).map { it.toDomain() }
     }
-
     override suspend fun upsert(note: Note) = withContext(Dispatchers.IO) {
         db.noteDao().upsert(note.toEntity())
     }
-
     override suspend fun delete(id: Long) = withContext(Dispatchers.IO) {
         db.noteDao().delete(id)
     }

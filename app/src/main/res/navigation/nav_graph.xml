@@ -14,6 +14,17 @@
         <action
             android:id="@+id/action_home_to_search"
             app:destination="@id/searchFragment" />
+        <action android:id="@+id/action_home_to_starred" app:destination="@id/starredFragment" />
+        <action android:id="@+id/action_home_to_history" app:destination="@id/historyFragment" />
+        <action android:id="@+id/action_home_to_notes" app:destination="@id/notesListFragment" />
+        <action android:id="@+id/action_home_to_bookmarks" app:destination="@id/bookmarksFragment" />
+        <action android:id="@+id/action_home_to_collections" app:destination="@id/collectionsFragment" />
+        <action android:id="@+id/action_home_to_saved_searches" app:destination="@id/savedSearchesFragment" />
+        <action android:id="@+id/action_home_to_import_export" app:destination="@id/importExportFragment" />
+        <action android:id="@+id/action_home_to_templates" app:destination="@id/templatesFragment" />
+        <action android:id="@+id/action_home_to_checklists" app:destination="@id/checklistsFragment" />
+        <action android:id="@+id/action_home_to_dockets" app:destination="@id/docketsFragment" />
+
     </fragment>
 
     <fragment
@@ -33,6 +44,17 @@
             android:id="@+id/action_document_self"
             app:destination="@id/documentFragment" />
     </fragment>
+    <fragment android:id="@+id/starredFragment" android:name="io.github.stcksmsh.pravnik.ui.starred.StarredFragment" android:label="Starred" />
+    <fragment android:id="@+id/historyFragment" android:name="io.github.stcksmsh.pravnik.ui.history.HistoryFragment" android:label="History" />
+    <fragment android:id="@+id/notesListFragment" android:name="io.github.stcksmsh.pravnik.ui.notes.NotesListFragment" android:label="Notes" />
+    <fragment android:id="@+id/bookmarksFragment" android:name="io.github.stcksmsh.pravnik.ui.bookmarks.BookmarksFragment" android:label="Bookmarks" />
+    <fragment android:id="@+id/collectionsFragment" android:name="io.github.stcksmsh.pravnik.ui.collections.CollectionsFragment" android:label="Collections" />
+    <fragment android:id="@+id/savedSearchesFragment" android:name="io.github.stcksmsh.pravnik.ui.saved.SavedSearchesFragment" android:label="Saved Searches" />
+    <fragment android:id="@+id/importExportFragment" android:name="io.github.stcksmsh.pravnik.ui.data.ImportExportFragment" android:label="Import/Export" />
+    <fragment android:id="@+id/templatesFragment" android:name="io.github.stcksmsh.pravnik.ui.tools.TemplatesFragment" android:label="Templates" />
+    <fragment android:id="@+id/checklistsFragment" android:name="io.github.stcksmsh.pravnik.ui.tools.ChecklistsFragment" android:label="Checklists" />
+    <fragment android:id="@+id/docketsFragment" android:name="io.github.stcksmsh.pravnik.ui.tools.DocketsFragment" android:label="Dockets" />
+
 
     <fragment
         android:id="@+id/searchFragment"

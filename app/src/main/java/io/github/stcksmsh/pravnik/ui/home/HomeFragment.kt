@@ -46,6 +46,16 @@ class HomeFragment : Fragment() {
         ).forEach { (chip, type) ->
             chip.setOnCheckedChangeListener { _, _ -> vm.toggleType(type) }
         }
+        binding.btnStarred.setOnClickListener { findNavController().navigate(R.id.action_home_to_starred) }
+        binding.btnHistory.setOnClickListener { findNavController().navigate(R.id.action_home_to_history) }
+        binding.btnNotes.setOnClickListener { findNavController().navigate(R.id.action_home_to_notes) }
+        binding.btnBookmarks.setOnClickListener { findNavController().navigate(R.id.action_home_to_bookmarks) }
+        binding.btnCollections.setOnClickListener { findNavController().navigate(R.id.action_home_to_collections) }
+        binding.btnSavedSearches.setOnClickListener { findNavController().navigate(R.id.action_home_to_saved_searches) }
+        binding.btnImportExport.setOnClickListener { findNavController().navigate(R.id.action_home_to_import_export) }
+        binding.btnTemplates.setOnClickListener { findNavController().navigate(R.id.action_home_to_templates) }
+        binding.btnChecklists.setOnClickListener { findNavController().navigate(R.id.action_home_to_checklists) }
+        binding.btnDockets.setOnClickListener { findNavController().navigate(R.id.action_home_to_dockets) }
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

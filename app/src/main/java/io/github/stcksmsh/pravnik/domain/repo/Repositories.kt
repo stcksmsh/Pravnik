@@ -92,7 +92,7 @@ interface CollectionsRepo {
     suspend fun deleteItem(collectionId: Long, position: Int)
 }
 
-interface NotesRepo { suspend fun listForDoc(docId: String): List<Note>; suspend fun upsert(note: Note): Long; suspend fun delete(id: Long) }
+interface NotesRepo { suspend fun listAll(): List<Note>; suspend fun listForDoc(docId: String): List<Note>; suspend fun upsert(note: Note): Long; suspend fun delete(id: Long) }
 interface HistoryRepo { suspend fun recent(limit: Int): List<History>; suspend fun insert(item: History): Long; suspend fun clear() }
 
 interface SavedSearchesRepo { suspend fun listSaved(): List<SavedSearch>; suspend fun upsert(item: SavedSearch): Long; suspend fun delete(id: Long) }

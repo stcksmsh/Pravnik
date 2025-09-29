@@ -175,6 +175,9 @@ interface BookmarkDao {
 
 @Dao
 interface NoteDao {
+    @Query("SELECT * FROM notes ORDER BY updatedAt DESC")
+    suspend fun listAll(): List<NoteEntity>
+
     @Query("SELECT * FROM notes WHERE docId = :docId ORDER BY updatedAt DESC")
     suspend fun listForDoc(docId: String): List<NoteEntity>
 

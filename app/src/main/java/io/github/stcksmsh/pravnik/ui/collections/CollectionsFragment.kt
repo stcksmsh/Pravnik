@@ -6,10 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
-import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.stcksmsh.pravnik.databinding.FragmentSimpleListTabBinding
 import io.github.stcksmsh.pravnik.domain.model.Collection
@@ -24,7 +20,6 @@ class CollectionsFragment : Fragment() {
 
     @Inject lateinit var collectionsRepo: CollectionsRepo
 
-    private val adapter = CollectionsAdapter { item -> /* open items screen later */ }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSimpleListTabBinding.inflate(inflater, container, false)
@@ -34,10 +29,10 @@ class CollectionsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
-        binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             val items = collectionsRepo.listCollections()
-            adapter.submitList(items)
+            val names = items.map { it.name }
+            binding.list.adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, names)
         }
     }
 

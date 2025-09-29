@@ -43,8 +43,8 @@ class ImportExportFragment : Fragment() {
         withContext(Dispatchers.IO) {
             val ctx = requireContext().applicationContext
             val file = java.io.File(ctx.filesDir, "pravnik-export.json")
-            // TODO: serialize user data repos here
-            file.writeText("{}")
+            val data = exportUserData()
+            file.writeText(data)
             withContext(Dispatchers.Main) {
                 binding.tvStatus.text = "Exported to: ${'$'}{file.absolutePath}"
             }
@@ -57,6 +57,15 @@ class ImportExportFragment : Fragment() {
             val file = java.io.File(ctx.filesDir, "pravnik-export.json")
             if (file.exists()) {
                 val json = file.readText()
+                importUserData(json)
+                withContext(Dispatchers.Main) {
+                    binding.tvStatus.text = "Imported from: ${'$'}{file.absolutePath} (size ${'$'}{json.length} bytes)"
+                }
+            } else {
+                withContext(Dispatchers.Main) {
+                    binding.tvStatus.text = "No export file found."
+                }
+            }
     private suspend fun exportUserData(): String {
         val bookmarks = bookmarksRepo.listBookmarks()
         val notes = notesRepo.listAll()

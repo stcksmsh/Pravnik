@@ -23,7 +23,7 @@ class SavedSearchesFragment : Fragment() {
 
     @Inject lateinit var savedRepo: SavedSearchesRepo
 
-    private val adapter = SavedAdapter { /* TODO: run search later */ }
+    private val adapter = SavedAdapter()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSimpleListTabBinding.inflate(inflater, container, false)

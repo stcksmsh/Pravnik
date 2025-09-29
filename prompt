@@ -1,0 +1,224 @@
+You are an engineer. Build the **Pravnik** Android app as specified below. You will have access to all code written so far, but you must **completely redo the database implementation** (models, Room schema, DAOs, repositories) following these instructions. Use the newest versions of all dependencies, Gradle Kotlin DSL (`build.gradle.kts`), and the XML Views system (not Compose).
+
+---
+
+## Goal
+An Android app providing fast, offline access to legal documents and practice materials. Supports **constitutions (ustav)**, **laws (zakoni)**, **bylaws (podzakonski akti)**, **court practice (sudska praksa)**, and **legal/administrative practice (pravna praksa)** across multiple languages and jurisdictions. Lawyers can search, navigate, bookmark, annotate, organize, track, and cross-reference content.
+
+---
+
+## Tech Stack
+- Android (minSdk 24, target latest)
+- Kotlin + Coroutines
+- **XML Views** (not Compose)
+- Gradle Kotlin DSL build system
+- MVVM + Clean architecture
+- Hilt (DI)
+- Room + SQLite FTS (offline-first DB)
+- Navigation Component (single-activity, multi-fragment)
+- Material Components (latest stable)
+
+---
+
+## Core Features
+
+### 1) Home
+- Filter chips: Constitution • Laws • Bylaws • **Court practice** • **Legal practice**
+- Global search bar (FTS)
+- Cards: title • type badge • citation/meta • effective date • starred
+- Quick actions: Open • Search-in-doc • Star • Share
+
+### 2) Document & Practice Reader
+- Header: title, type badge, citation/meta chips (effective/repealed for acts; court/date/outcome for cases; authority/date for practice notes)
+- Outline drawer: Chapters/Sections (level 1) → Articles (level 2) for normative texts; Sections or Body for cases/practice notes
+- **Unit reader** (one `Unit` per screen):
+  - Render paragraphs (stavovi), points (tačke), bullets (alineje) from plain text
+  - **Smart hyperlinks**: detect references like `čl. 12` and clickable citations to other documents/cases; show tooltip if target missing
+  - **Inline definitions**: underline defined terms → bottom sheet with definition + jump link
+  - **Highlight search terms** in context
+- Tabs shown when relevant:
+  - **Read | Definitions | Tariffs | Notes | Meta (cases/practice)**
+  - **Citations** (citator): shows **cited by / cites** edges across laws, cases, practice notes
+
+### 3) Search
+- Global FTS across units (+ title)
+- Highlighted snippets
+- Filters (facets):
+  - Type (Constitution/Law/Bylaw/Case/Practice)
+  - Document(s)
+  - Unit number range (for statutes)
+  - **For cases**: court, year, outcome
+  - **For practice**: issuing authority (ministry/agency/bar), year, topic tags
+- Query helpers: `type:case`, `type:practice`, `doc:"Zakon o ..."`, `num:12`, `court:"Vrhovni sud"`, `year:2023`
+
+### 4) User Features
+- **Bookmarks** with **folders and tags**; optional note per bookmark
+- **Notes** per unit (plain text)
+- **History** of visited units
+- **Starred documents** (pin to home)
+- **Collections** (saved sets of anchors or saved searches)
+- **Saved searches & alerts**: persist queries with filters; optional local notification when new data matches (triggered on data update)
+- **Export/Import** user data as JSON (bookmarks, notes, collections, saved searches)
+
+### 5) Lawyer Tools (not legal advice; productivity features)
+- **Citator**: bidirectional citation graph (law ↔ case ↔ practice)
+- **Deadline calculator** (configurable offsets, court/administrative rules; simple rules engine)
+- **Docket/Case tracker** (manual entries): track case name/number, court, party, events, reminders
+- **Template & checklist library** (plain text/Markdown): clauses, motions, standard filings; checklist items linked to anchors
+- **Cross-doc links**: show related bylaws implementing a law; show cases interpreting a specific article
+
+### 6) Accessibility & UX
+- Adjustable font size & line spacing
+- TalkBack labels (announce “Član 12, Zakon X”)
+- RTL support, multiple languages
+- High contrast themes
+
+---
+
+## Data Model
+
+> Keep the DB lean. Store **plain text** for units and derive formatting at render time. Use FTS mirror for search. Make it **jurisdiction- and language-agnostic**.
+
+### Core Entities
+- **Document**
+  - `id` (slug), `title`, `type` = { `CONSTITUTION`, `LAW`, `BYLAW`, `CASE`, `PRACTICE` }
+  - `language` (BCP47, e.g. `sr-Latn`, `me`, `en`), `jurisdiction` (e.g., `ME`)
+  - `citation` (Official Gazette/case citation/authority memo id)
+  - `promulgatedOn`, `effectiveOn`, `repealedOn` (ISO dates; nullable)
+- **Unit** (smallest addressable chunk)
+  - `id`, `docId`, `level` (0 header / 1 chapter / 2 article or body), `label`, `number`, `title`, `anchor`, `text`
+- **Definition** (optional)
+  - `id`, `docId`, `term`, `text`, `unitAnchor`
+- **Tariff** (optional)
+  - `id`, `docId`, `key` (e.g., “Tarifni broj 4”), `title`, `amount`, `notes`
+- **CaseMeta** (only when `type=CASE`)
+  - `docId`, `court`, `caseNumber`, `decidedOn`, `ecli`, `parties`, `keywords`, `outcome`
+- **PracticeMeta** (only when `type=PRACTICE`)
+  - `docId`, `authority` (issuer; e.g., ministry, tax admin, bar), `refNumber` (file no.), `issuedOn`, `category` (guidance/interpretation/FAQ), `keywords`
+
+### Cross-reference & Citator (optional but recommended)
+- **CitationEdge** (directed edge)
+  - `fromDocId`, `fromAnchor?`, `toDocId`, `toAnchor?`, `relation` (`cites`, `interprets`, `implements`, `overrules`, `follows`), `weight` (small int), `note?`
+- **CrossRefHint** (lightweight local links extracted at render time; can be regenerated)
+  - `docId`, `unitAnchor`, `refText` (e.g., “čl. 12”), `targetDocId?`, `targetAnchor?`
+
+### User & Organization Entities
+- **BookmarkFolder** (`id`, `name`, `createdAt`)
+- **Bookmark** (`id`, `folderId`, `docId`, `unitAnchor`, `title?`, `note?`, `createdAt`)
+- **BookmarkTag** (`bookmarkId`, `tag`) — or a `tagsCsv` column if you prefer minimalism
+- **Note** (`id`, `docId`, `unitAnchor`, `title?`, `body`, `updatedAt`)
+- **History** (`id`, `docId`, `unitAnchor`, `visitedAt`)
+- **StarredDoc** (`docId` PK, `starredAt`)
+- **Collection** (`id`, `name`, `createdAt`)
+- **CollectionItem** (`collectionId`, `docId`, `unitAnchor`, `position`)
+- **SavedSearch** (`id`, `query`, `filtersJson`, `createdAt`, `notify` bool)
+- **SearchQuery** (`id`, `query`, `createdAt`)
+- **Template** (`id`, `title`, `language`, `bodyMd`, `tagsCsv`, `createdAt`)
+- **Checklist** (`id`, `title`, `docId?`, `unitAnchor?`, `itemsJson`, `createdAt`)
+- **Docket** (`id`, `caseName`, `caseNumber`, `court`, `notes`, `createdAt`)
+- **DocketEvent** (`id`, `docketId`, `title`, `date`, `note?`, `reminder?`)
+
+### DB requirements
+- **Room** with **FTS (units_fts)** for full-text search (diacritic-insensitive `unicode61 remove_diacritics=2`)
+- Migrations enabled; export schema
+- Reasonable indexes: `units(docId, anchor)`, `units(number)`, `definitions(term)`, `case_meta(court, decidedOn)`, `practice_meta(authority, issuedOn)`
+
+### Repositories
+- **DocumentsRepo**: list/get; star/unstar; list starred
+- **UnitsRepo**: get by anchor/number; list for level; list labels
+- **SearchRepo**: FTS with filters and facets
+- **DefinitionsRepo**: list for doc
+- **TariffsRepo**: list for doc; get by key
+- **CaseMetaRepo**: get/upsert
+- **PracticeMetaRepo**: get/upsert
+- **CitatorRepo**: list edges from/to; add edges (batch); resolve links
+- **BookmarksRepo**: folders, bookmarks, tags
+- **CollectionsRepo**: CRUD collections + items
+- **NotesRepo**: list/upsert/delete
+- **HistoryRepo**: recent/clear
+- **SavedSearchesRepo**: CRUD + enable/disable notifications
+- **TemplatesRepo**: list/search templates
+- **ChecklistsRepo**: CRUD
+- **DocketsRepo**: CRUD docket + events
+
+---
+
+## Rendering Rules (plain text → structure at display)
+- **Paragraphs**: split on `\n\((\d+)\)\s`
+- **Points**: lines starting `^\s*\d+\)`
+- **Bullets**: lines starting `^\s*–\s`
+- **Smart hyperlinks**:
+  - Detect intra-doc refs: `\bčl\.?\s*(\d+)\b` (and localized variants); clickable → open `UnitsRepo.getByNumber()`
+  - Detect titles of other acts/cases if present in DB; show preview + “Open”
+- **Definitions**: underline terms (diacritic-insensitive), bottom sheet with text + “Open context”
+- **Search highlighting**: background spans for query tokens
+
+---
+
+## Project Structure
+```
+app/
+  build.gradle.kts
+  src/main/java/io/github/stcksmsh/pravnik/
+    ui/ (Fragments, ViewModels, Adapters, helpers)
+    domain/ (models, repos)
+    data/ (Room DB, repo impls)
+    di/ (Hilt modules)
+  src/main/res/
+    layout/ (XML layouts)
+    navigation/nav_graph.xml
+    values/strings.xml, themes.xml, styles.xml
+build.gradle.kts (root)
+settings.gradle.kts
+```
+
+---
+
+## Screens (Fragments)
+- **HomeFragment**: filters, search, starred docs, recent activity
+- **DocumentFragment**: header, outline, unit reader, tabs (Read/Definitions/Tariffs/Notes/Meta/Citations)
+- **PracticeFragment** (optional separate entry-point view): list practice notes by authority/year/topic; open like Document
+- **SearchFragment**: search bar, facets, results with highlights
+- **BookmarksFragment**: folders + bookmarks + tags, move/rename/delete
+- **CollectionsFragment**: manage collections; add/remove anchors
+- **NotesFragment**: list notes (group by doc); open anchor on tap
+- **HistoryFragment**: recents
+- **CitatorFragment**: for a given doc/unit, show **Cited By** and **Cites** lists (group by type)
+- **TemplatesFragment**: list/search templates; open details
+- **ChecklistsFragment**: view/run checklists; link items to anchors
+- **DocketsFragment**: list dockets; open details (events timeline); add reminders
+- **SettingsFragment**: language, text size, privacy, data update, export/import
+
+---
+
+## Tasks for GPT Engineer
+1. Scaffold Android project (KTS, minSdk=24) with latest AGP/Kotlin.
+2. Add dependencies: Kotlin, Coroutines, AppCompat, Material, RecyclerView, ConstraintLayout, Navigation, Hilt, Room (+ ktx, compiler), WorkManager (for background import/alerts).
+3. **Completely design DB** per **Data Model** above:
+   - Implement all entities, DAOs, FTS mirror, and `AppDb`
+   - Add indices + migrations; export schema
+4. Implement repository interfaces + Room-backed implementations for all repos listed.
+5. Build UI with XML Views and Fragments; single-activity Navigation.
+6. Implement rendering helpers (paragraph splitter, points/bullets renderer, smart hyperlinks, definition highlighter, query highlighter).
+7. Implement **Bookmarks with folders and tags**, **Notes**, **History**, **Starred docs**.
+8. Implement **Collections**, **Saved searches** (with optional local notifications after data updates), **Templates**, **Checklists**, **Dockets**.
+9. Implement **Citator** (Citations tab + CitatorFragment) using `CitationEdge` edges.
+10. Implement **Search** with facets for court/authority/year and type/doc filters.
+11. Wire navigation with SafeArgs; implement deep links `/doc/{id}#anchor`.
+12. Implement **Export/Import JSON** for user data, and a **data bundle importer** for new legal content (signed ZIP).
+13. Accessibility & i18n: TalkBack, large text, RTL; all strings localized; diacritic-insensitive search.
+14. Tests: DAO/FTS tests; hyperlink regex; rendering helpers; UI navigation; repo integration.
+15. README: setup (AGP/Kotlin versions), build, data import, migrations, feature overview.
+
+---
+
+## Acceptance Criteria
+- All features from **Core Features** and **Lawyer Tools** implemented
+- Full offline DB; FTS search with facets; highlighted snippets
+- Reader: paragraphs/points/bullets; smart hyperlinks; definitions chips; tariffs tab; case/practice meta
+- User: bookmarks (folders/tags), notes, history, starred docs; collections; saved searches with optional alerts
+- Citator: edges shown per doc/unit (Cited by / Cites)
+- Templates & checklists usable; Dockets with events/reminders
+- Accessibility & multilingual ready
+- Passing unit + UI tests
+- Project builds with `./gradlew assembleRelease`

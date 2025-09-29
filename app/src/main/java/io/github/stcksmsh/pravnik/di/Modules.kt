@@ -33,6 +33,7 @@ object Modules {
     @Provides @Singleton fun provideTariffsRepo(db: AppDb): TariffsRepo = TariffsRepoImpl(db)
     @Provides @Singleton fun provideCaseMetaRepo(db: AppDb): CaseMetaRepo = CaseMetaRepoImpl(db)
     @Provides @Singleton fun providePracticeMetaRepo(db: AppDb): PracticeMetaRepo = PracticeMetaRepoImpl(db)
+    @Provides @Singleton fun provideSearchQueriesRepo(db: AppDb): SearchQueriesRepo = SearchQueriesRepoImpl(db)
     @Provides @Singleton fun provideCitatorRepo(db: AppDb): CitatorRepo = CitatorRepoImpl(db)
     @Provides @Singleton fun provideBookmarksRepo(db: AppDb): BookmarksRepo = BookmarksRepoImpl(db)
     @Provides @Singleton fun provideCollectionsRepo(db: AppDb): CollectionsRepo = CollectionsRepoImpl(db)

@@ -63,6 +63,8 @@ interface SearchRepo {
     suspend fun search(query: String, filters: SearchFilters = SearchFilters(), limit: Int = 50, offset: Int = 0): SearchResult
 }
 
+interface SearchQueriesRepo { suspend fun recent(limit: Int): List<SearchQuery>; suspend fun insert(item: SearchQuery): Long }
+
 interface DefinitionsRepo { suspend fun listForDoc(docId: String): List<Definition> }
 interface TariffsRepo { suspend fun listForDoc(docId: String): List<Tariff>; suspend fun getByKey(docId: String, key: String): Tariff? }
 interface CaseMetaRepo { suspend fun get(docId: String): CaseMeta?; suspend fun upsert(meta: CaseMeta) }

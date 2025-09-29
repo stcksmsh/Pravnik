@@ -15,6 +15,8 @@ import io.github.stcksmsh.pravnik.R
 import io.github.stcksmsh.pravnik.databinding.FragmentHomeBinding
 import io.github.stcksmsh.pravnik.domain.model.DocumentType
 import kotlinx.coroutines.flow.collectLatest
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 
 @AndroidEntryPoint
 class HomeFragment : Fragment() {
@@ -57,10 +59,38 @@ class HomeFragment : Fragment() {
             cg.addView(chip)
         }
 
+        // Setup section lists
+        binding.recentSearchesList.layoutManager = LinearLayoutManager(requireContext())
+        binding.recentBookmarksList.layoutManager = LinearLayoutManager(requireContext())
+        binding.recentHistoryList.layoutManager = LinearLayoutManager(requireContext())
+        binding.recentStarredList.layoutManager = LinearLayoutManager(requireContext())
+
+        val queriesAdapter = SimpleTextAdapter(HomeBinders.query) { /* navigate to Search with query? */ }
+        val bookmarksAdapter = SimpleTextAdapter(HomeBinders.bookmark) { /* TODO: open doc */ }
+        val historyAdapter = SimpleTextAdapter(HomeBinders.history) { /* TODO: open doc */ }
+        val starredAdapter = SimpleTextAdapter(HomeBinders.document) { doc ->
+            val action = HomeFragmentDirections.actionHomeToDocument(doc.id, "")
+            findNavController().navigate(action)
+        }
+        binding.recentSearchesList.adapter = queriesAdapter
+        binding.recentBookmarksList.adapter = bookmarksAdapter
+        binding.recentHistoryList.adapter = historyAdapter
+        binding.recentStarredList.adapter = starredAdapter
+
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
-            vm.docs.collectLatest { docs ->
-                binding.emptyView.isVisible = docs.isEmpty()
-            }
+            vm.docs.collectLatest { docs -> binding.emptyView.isVisible = docs.isEmpty() }
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            vm.recentQueries.collectLatest { queriesAdapter.submitList(it) }
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            vm.recentBookmarks.collectLatest { bookmarksAdapter.submitList(it) }
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            vm.recentHistory.collectLatest { historyAdapter.submitList(it) }
+        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            vm.starredDocs.collectLatest { starredAdapter.submitList(it) }
         }
     }
 

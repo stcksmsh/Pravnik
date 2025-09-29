@@ -84,12 +84,14 @@ class SearchFragment : Fragment() {
 
     private fun collectFilters(): SearchFilters {
         val selectedTypes = binding.typeChips.children.mapNotNull { (it as? Chip)?.takeIf { c -> c.isChecked }?.text?.toString()?.let { DocumentType.valueOf(it) } }.toSet()
-        val court = (binding.courtChips.children.firstOrNull { (it as? Chip)?.isChecked == true } as? Chip)?.text?.toString()
-        val caseYear = (binding.caseYearChips.children.firstOrNull { (it as? Chip)?.isChecked == true } as? Chip)?.text?.toString()?.toIntOrNull()
-        val authority = (binding.authorityChips.children.firstOrNull { (it as? Chip)?.isChecked == true } as? Chip)?.text?.toString()
-        val practiceYear = (binding.practiceYearChips.children.firstOrNull { (it as? Chip)?.isChecked == true } as? Chip)?.text?.toString()?.toIntOrNull()
+        val selectedDocIds = binding.docChips.children.mapNotNull { (it as? Chip)?.takeIf { c -> c.isChecked }?.tag?.toString() }.toSet()
+        val court = (binding.courtChips.children.firstOrNull { (it as? Chip)?.isChecked == true } as? Chip)?.tag?.toString()
+        val caseYear = (binding.caseYearChips.children.firstOrNull { (it as? Chip)?.isChecked == true } as? Chip)?.tag?.toString()?.toIntOrNull()
+        val authority = (binding.authorityChips.children.firstOrNull { (it as? Chip)?.isChecked == true } as? Chip)?.tag?.toString()
+        val practiceYear = (binding.practiceYearChips.children.firstOrNull { (it as? Chip)?.isChecked == true } as? Chip)?.tag?.toString()?.toIntOrNull()
         return SearchFilters(
             types = selectedTypes.ifEmpty { null },
+            docIds = selectedDocIds.ifEmpty { null },
             court = court,
             caseYear = caseYear,
             authority = authority,
@@ -98,29 +100,28 @@ class SearchFragment : Fragment() {
     }
 
     private fun renderFacets(res: io.github.stcksmsh.pravnik.domain.repo.SearchResult, filters: SearchFilters) {
-        fun ChipGroupUpdater(group: com.google.android.material.chip.ChipGroup, values: List<String>, singleSelection: Boolean = true) {
+        fun chipGroup(group: com.google.android.material.chip.ChipGroup, entries: List<Pair<String,String>>, singleSelection: Boolean = true) {
             group.removeAllViews()
             group.isSingleSelection = singleSelection
-            values.forEach { v ->
+            entries.forEach { (label, key) ->
                 val chip = layoutInflater.inflate(R.layout.view_choice_chip, group, false) as Chip
-                chip.text = v
+                chip.text = label
+                chip.tag = key
                 chip.isCheckable = true
                 chip.isChecked = false
                 chip.setOnCheckedChangeListener { _, _ -> scheduleSearch(binding.queryInput.text?.toString()) }
                 group.addView(chip)
             }
         }
-        // Docs facet: show top 10 doc titles by count
-        val topDocs = res.facets.docCounts.entries.sortedByDescending { it.value }.take(10).map { it.key }
-        ChipGroupUpdater(binding.docChips, topDocs, singleSelection = false)
-        // Courts
-        ChipGroupUpdater(binding.courtChips, res.facets.courts.keys.sorted())
-        // Case years descending
-        ChipGroupUpdater(binding.caseYearChips, res.facets.caseYears.keys.sortedDescending().map { it.toString() })
-        // Authorities
-        ChipGroupUpdater(binding.authorityChips, res.facets.authorities.keys.sorted())
-        // Practice years descending
-        ChipGroupUpdater(binding.practiceYearChips, res.facets.practiceYears.keys.sortedDescending().map { it.toString() })
+        // Preload docs map for titles
+        val docs = runCatching { documentsRepo.listAll() }.getOrNull().orEmpty().associateBy { it.id }
+        val topDocIds = res.facets.docCounts.entries.sortedByDescending { it.value }.take(10).map { it.key }
+        val docEntries = topDocIds.map { id -> (docs[id]?.title ?: id) to id }
+        chipGroup(binding.docChips, docEntries, singleSelection = false)
+        chipGroup(binding.courtChips, res.facets.courts.keys.sorted().map { it to it })
+        chipGroup(binding.caseYearChips, res.facets.caseYears.keys.sortedDescending().map { it.toString() to it.toString() })
+        chipGroup(binding.authorityChips, res.facets.authorities.keys.sorted().map { it to it })
+        chipGroup(binding.practiceYearChips, res.facets.practiceYears.keys.sortedDescending().map { it.toString() to it.toString() })
     }
 
     data class UiRow(val docId: String, val anchor: String, val docTitle: String, val unitTitle: String?, val snippet: String, val query: String)

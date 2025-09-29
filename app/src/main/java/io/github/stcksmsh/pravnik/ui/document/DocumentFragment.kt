@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,6 +19,7 @@ import io.github.stcksmsh.pravnik.databinding.FragmentDocumentBinding
 import io.github.stcksmsh.pravnik.domain.repo.DefinitionsRepo
 import io.github.stcksmsh.pravnik.domain.repo.TariffsRepo
 import io.github.stcksmsh.pravnik.domain.repo.UnitsRepo
+import io.github.stcksmsh.pravnik.domain.repo.DocumentsRepo
 import io.github.stcksmsh.pravnik.ui.util.RenderUtils
 import javax.inject.Inject
 import kotlinx.coroutines.launch
@@ -32,6 +34,7 @@ class DocumentFragment : Fragment() {
     @Inject lateinit var unitsRepo: UnitsRepo
     @Inject lateinit var definitionsRepo: DefinitionsRepo
     @Inject lateinit var tariffsRepo: TariffsRepo
+    @Inject lateinit var documentsRepo: DocumentsRepo
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDocumentBinding.inflate(inflater, container, false)
@@ -41,7 +44,18 @@ class DocumentFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupTabs()
-        renderRead(args.docId, args.anchor)
+        // Update title from document
+        viewLifecycleOwner.lifecycleScope.launch {
+            val doc = documentsRepo.get(args.docId)
+            binding.title.text = doc?.title ?: args.docId
+        }
+        parentFragmentManager.setFragmentResultListener("doc_anchor", viewLifecycleOwner) { _, bundle ->
+            val anchor = bundle.getString("anchor").orEmpty()
+            if (anchor.isNotEmpty()) {
+                val action = DocumentFragmentDirections.actionDocumentSelf(args.docId, anchor)
+                findNavController().navigate(action)
+            }
+        }
     }
 
     private fun setupTabs() {
@@ -53,62 +67,45 @@ class DocumentFragment : Fragment() {
             getString(R.string.tab_meta),
             getString(R.string.tab_citations),
         )
+        val docId = args.docId
+        val anchor = args.anchor
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount() = titles.size
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
-                    0 -> ReadTab()
-                    1 -> SimpleListTab()
-                    2 -> SimpleListTab()
-                    3 -> SimpleListTab()
-                    4 -> SimpleListTab()
-                    else -> SimpleListTab()
+                    0 -> ReadTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("anchor", anchor) } }
+                    1 -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "defs") } }
+                    2 -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "tariffs") } }
+                    3 -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "notes") } }
+                    4 -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "meta") } }
+                    else -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "citations") } }
                 }
             }
         }
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, pos ->
             tab.text = titles[pos]
         }.attach()
-        binding.outlineBtn.setOnClickListener {
-            // TODO: open outline drawer/sheet
+        binding.outlineBtn.setOnClickListener { openOutline() }
+    private fun openOutline() {
+        val ctx = requireContext()
+        val dialog = com.google.android.material.bottomsheet.BottomSheetDialog(ctx)
+        val v = layoutInflater.inflate(R.layout.bottom_sheet_outline, null)
+        val list = v.findViewById<android.widget.ListView>(R.id.outlineList)
+        viewLifecycleOwner.lifecycleScope.launch {
+            val labels = unitsRepo.listLabels(args.docId)
+            list.adapter = android.widget.ArrayAdapter(ctx, android.R.layout.simple_list_item_1, labels.map { it.label })
+            list.setOnItemClickListener { _, _, position, _ ->
+                val anchor = labels[position].anchor
+                parentFragmentManager.setFragmentResult("doc_anchor", Bundle().apply { putString("anchor", anchor) })
+                dialog.dismiss()
+            }
         }
+        dialog.setContentView(v)
+        dialog.show()
     }
 
-    private fun renderRead(docId: String, anchor: String) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val unit = if (anchor.isNotEmpty()) unitsRepo.getByAnchor(docId, anchor) else null
-            val title = unit?.title ?: "${'$'}docId#${'$'}anchor"
-            binding.title.text = title
-            val bodyText = unit?.text ?: sampleText()
-            val blocks = RenderUtils.parseUnitText(bodyText)
-            val sb = StringBuilder()
-            blocks.forEachIndexed { idx, b ->
-                if (b.body.isNotBlank()) sb.append(b.body.trim()).append('\n')
-                if (b.points.isNotEmpty()) b.points.forEach { sb.append(it).append('\n') }
-                if (b.bullets.isNotEmpty()) b.bullets.forEach { sb.append(it).append('\n') }
-                if (idx < blocks.lastIndex) sb.append('\n')
-            }
-            val underlined = RenderUtils.underlineTerms(sb.toString(), listOf("pojam", "definicija"))
-            val highlighted = RenderUtils.highlightQuery(underlined.toString(), RenderUtils.tokenizeQuery(anchor), 0x443498DB.toInt())
-            val withRefs = RenderUtils.applyClickableArticleRefs(highlighted.toString()) { number ->
-                object : android.text.style.ClickableSpan() {
-                    override fun onClick(widget: View) {
-                        viewLifecycleOwner.lifecycleScope.launch {
-                            val target = unitsRepo.getByNumber(docId, number)
-                            if (target != null) renderRead(docId, target.anchor) else Toast.makeText(requireContext(), "Target čl. ${'$'}number not found", Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-            // Place the read text into a simple TextView within a placeholder fragment container
-            // For now, we reuse the fragment's own view by inflating a minimal layout
-            val tv = TextView(requireContext())
-            tv.movementMethod = LinkMovementMethod.getInstance()
-            tv.text = withRefs
-            // Replace the first page's content view using viewPager current fragment later; here we set title only
-            binding.title.text = title
-        }
     }
+
 
     private fun sampleText(): String = """
         Član 1
@@ -126,7 +123,4 @@ class DocumentFragment : Fragment() {
         super.onDestroyView()
         _binding = null
     }
-
-    class ReadTab : Fragment()
-    class SimpleListTab : Fragment()
 }

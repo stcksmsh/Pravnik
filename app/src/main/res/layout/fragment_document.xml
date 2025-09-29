@@ -21,10 +21,18 @@
         android:paddingTop="8dp"
         android:gravity="end">
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/starBtn"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/star_doc"
+            android:text="@string/star"/>
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/outlineBtn"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/outline"
             android:text="@string/outline"/>
     </LinearLayout>
 

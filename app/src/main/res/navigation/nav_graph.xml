@@ -29,11 +29,18 @@
             android:defaultValue="" />
         <deepLink
             app:uri="pravnik://doc/{docId}#${anchor}" />
+        <action
+            android:id="@+id/action_document_self"
+            app:destination="@id/documentFragment" />
     </fragment>
 
     <fragment
         android:id="@+id/searchFragment"
         android:name="io.github.stcksmsh.pravnik.ui.search.SearchFragment"
-        android:label="Search" />
+        android:label="Search" >
+        <action
+            android:id="@+id/action_search_to_document"
+            app:destination="@id/documentFragment" />
+    </fragment>
 
 </navigation>

@@ -37,6 +37,7 @@
     <string name="home_bookmarks">Bookmarks</string>
     <string name="home_collections">Collections</string>
     <string name="home_saved_searches">Saved searches</string>
+    <string name="home_recent_searches">Recent searches</string>
     <string name="home_import_export">Import/Export</string>
     <string name="home_templates">Templates</string>
     <string name="home_checklists">Checklists</string>

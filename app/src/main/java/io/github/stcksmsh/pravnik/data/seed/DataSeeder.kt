@@ -105,5 +105,34 @@ class DataSeeder(private val db: AppDb) {
         // Citation: case cites law čl.1
         val edge = CitationEdge(fromDocId = caseDoc.id, fromAnchor = "body", toDocId = law.id, toAnchor = "clan-1", relation = CitationRelation.cites, weight = 1, note = null)
         db.citationDao().insertAll(listOf(edge.toEntity()))
+
+        // Star some docs
+        db.starredDao().star(StarredDocEntity(law.id, System.currentTimeMillis()))
+        db.starredDao().star(StarredDocEntity(caseDoc.id, System.currentTimeMillis() - 1000))
+
+        // Bookmarks
+        val now = System.currentTimeMillis()
+        val bm1 = Bookmark(id = 0, folderId = null, docId = law.id, unitAnchor = u1.anchor, title = "Član 1", note = null, tagsCsv = "intro;primjer", createdAt = now - 86400000)
+        val bm2 = Bookmark(id = 0, folderId = null, docId = caseDoc.id, unitAnchor = cu.anchor, title = "Obrazloženje", note = null, tagsCsv = null, createdAt = now - 43200000)
+        db.bookmarkDao().upsertBookmark(bm1.toEntity())
+        db.bookmarkDao().upsertBookmark(bm2.toEntity())
+
+        // History
+        val h1 = History(id = 0, docId = law.id, unitAnchor = u2.anchor, visitedAt = now - 600000)
+        val h2 = History(id = 0, docId = practiceDoc.id, unitAnchor = pu.anchor, visitedAt = now - 300000)
+        db.historyDao().insert(h1.toEntity())
+        db.historyDao().insert(h2.toEntity())
+
+        // Saved searches
+        val s1 = SavedSearch(id = 0, query = "taksa", filtersJson = null, createdAt = now - 7200000, notify = false)
+        val s2 = SavedSearch(id = 0, query = "Vrhovni sud", filtersJson = null, createdAt = now - 14400000, notify = true)
+        db.savedSearchDao().upsert(s1.toEntity())
+        db.savedSearchDao().upsert(s2.toEntity())
+
+        // Recent queries
+        val q1 = SearchQuery(id = 0, query = "član 1", createdAt = now - 200000)
+        val q2 = SearchQuery(id = 0, query = "tumačenje", createdAt = now - 100000)
+        db.searchQueryDao().insert(q1.toEntity())
+        db.searchQueryDao().insert(q2.toEntity())
     }
 }

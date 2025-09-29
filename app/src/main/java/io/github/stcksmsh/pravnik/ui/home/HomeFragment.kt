@@ -35,7 +35,7 @@ class HomeFragment : Fragment() {
         vm.load()
 
         // Section headers and See all
-        binding.sectionSavedSearches.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_saved_searches)
+        binding.sectionSavedSearches.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_recent_searches)
         binding.sectionBookmarks.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_bookmarks)
         binding.sectionHistory.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_history)
         binding.sectionStarred.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_starred)
@@ -65,9 +65,19 @@ class HomeFragment : Fragment() {
         binding.recentHistoryList.layoutManager = LinearLayoutManager(requireContext())
         binding.recentStarredList.layoutManager = LinearLayoutManager(requireContext())
 
-        val queriesAdapter = SimpleTextAdapter(HomeBinders.query) { /* navigate to Search with query? */ }
-        val bookmarksAdapter = SimpleTextAdapter(HomeBinders.bookmark) { /* TODO: open doc */ }
-        val historyAdapter = SimpleTextAdapter(HomeBinders.history) { /* TODO: open doc */ }
+        val queriesAdapter = SimpleTextAdapter(HomeBinders.query) { q ->
+            val action = HomeFragmentDirections.actionHomeToSearch()
+            findNavController().navigate(action)
+            // TODO: pass query as shared ViewModel or nav arg if supported
+        }
+        val bookmarksAdapter = SimpleTextAdapter(HomeBinders.bookmark) { b ->
+            val action = HomeFragmentDirections.actionHomeToDocument(b.docId, b.unitAnchor)
+            findNavController().navigate(action)
+        }
+        val historyAdapter = SimpleTextAdapter(HomeBinders.history) { h ->
+            val action = HomeFragmentDirections.actionHomeToDocument(h.docId, h.unitAnchor)
+            findNavController().navigate(action)
+        }
         val starredAdapter = SimpleTextAdapter(HomeBinders.document) { doc ->
             val action = HomeFragmentDirections.actionHomeToDocument(doc.id, "")
             findNavController().navigate(action)

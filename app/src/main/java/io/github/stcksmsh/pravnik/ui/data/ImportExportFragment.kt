@@ -66,6 +66,8 @@ class ImportExportFragment : Fragment() {
                     binding.tvStatus.text = "No export file found."
                 }
             }
+        }
+    }
     private suspend fun exportUserData(): String {
         val bookmarks = bookmarksRepo.listBookmarks()
         val notes = notesRepo.listAll()
@@ -186,18 +188,6 @@ class ImportExportFragment : Fragment() {
                     id = o.optLong("id"), caseName = o.getString("caseName"), caseNumber = o.optString("caseNumber", null),
                     court = o.optString("court", null), notes = o.optString("notes", null), createdAt = o.getLong("createdAt")
                 ))
-            }
-        }
-    }
-
-                // TODO: deserialize and import into repos
-                withContext(Dispatchers.Main) {
-                    binding.tvStatus.text = "Imported from: ${'$'}{file.absolutePath} (size ${'$'}{json.length} bytes)"
-                }
-            } else {
-                withContext(Dispatchers.Main) {
-                    binding.tvStatus.text = "No export file found."
-                }
             }
         }
     }

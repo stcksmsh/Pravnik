@@ -150,8 +150,8 @@ class SimpleListTabFragment : Fragment() {
                 if (body.isNotEmpty()) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         notesRepo.upsert(note.copy(body = body, updatedAt = System.currentTimeMillis()))
-                        view?.findViewById<android.widget.ListView>(R.id.list)?.let { list ->
-                            loadNotes(docId, list)
+                        view?.findViewById<RecyclerView>(R.id.list)?.let { rv ->
+                            loadNotes(docId, rv)
                         }
                     }
                 }
@@ -161,3 +161,36 @@ class SimpleListTabFragment : Fragment() {
             .show()
     }
 }
+
+class StringListAdapter(private val items: List<String>) : RecyclerView.Adapter<StringListAdapter.VH>() {
+    class VH(view: View) : RecyclerView.ViewHolder(view) {
+        private val t1: android.widget.TextView = view.findViewById(android.R.id.text1)
+        fun bind(text: String) { t1.text = text }
+    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val v = LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false)
+        return VH(v)
+    }
+    override fun getItemCount() = items.size
+    override fun onBindViewHolder(holder: VH, position: Int) { holder.bind(items[position]) }
+}
+
+class NotesMiniAdapter(
+    private val items: List<io.github.stcksmsh.pravnik.domain.model.Note>,
+    private val onClick: (io.github.stcksmsh.pravnik.domain.model.Note) -> Unit
+) : RecyclerView.Adapter<NotesMiniAdapter.VH>() {
+    class VH(view: View, private val onClick: (Int) -> Unit) : RecyclerView.ViewHolder(view) {
+        private val t1: android.widget.TextView = view.findViewById(android.R.id.text1)
+        fun bind(note: io.github.stcksmsh.pravnik.domain.model.Note) {
+            t1.text = note.body
+            itemView.setOnClickListener { onClick(bindingAdapterPosition) }
+        }
+    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val v = LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false)
+        return VH(v) { pos -> onClick(items[pos]) }
+    }
+    override fun getItemCount() = items.size
+    override fun onBindViewHolder(holder: VH, position: Int) { holder.bind(items[position]) }
+}
+

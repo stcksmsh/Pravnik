@@ -61,11 +61,12 @@
 
     <string name="content_desc_open_drawer">Open navigation menu</string>
     <string name="empty_list">Nothing here yet</string>
-</resources>
 
     <string name="see_all">See all</string>
     <string name="empty_recent_searches">No recent searches</string>
     <string name="empty_bookmarks">No bookmarks yet</string>
     <string name="empty_history">No recent history</string>
     <string name="empty_starred">No starred documents</string>
+</resources>
+
 

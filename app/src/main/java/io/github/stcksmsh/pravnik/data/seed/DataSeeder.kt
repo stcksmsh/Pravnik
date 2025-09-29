@@ -1,6 +1,7 @@
 package io.github.stcksmsh.pravnik.data.seed
 
 import io.github.stcksmsh.pravnik.data.db.AppDb
+import io.github.stcksmsh.pravnik.data.db.entity.StarredDocEntity
 import io.github.stcksmsh.pravnik.data.repo.toEntity
 import io.github.stcksmsh.pravnik.domain.model.*
 import kotlinx.coroutines.Dispatchers

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.view.isVisible
 import androidx.core.view.children
 import androidx.fragment.app.Fragment
@@ -35,15 +36,15 @@ class HomeFragment : Fragment() {
         vm.load()
 
         // Section headers and See all
-        binding.sectionSavedSearches.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_recent_searches)
-        binding.sectionBookmarks.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_bookmarks)
-        binding.sectionHistory.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_history)
-        binding.sectionStarred.findViewById<android.widget.TextView>(R.id.title).text = getString(R.string.home_starred)
+        binding.sectionSavedSearches.root.findViewById<TextView>(R.id.title).text = getString(R.string.home_recent_searches)
+        binding.sectionBookmarks.root.findViewById<TextView>(R.id.title).text = getString(R.string.home_bookmarks)
+        binding.sectionHistory.root.findViewById<TextView>(R.id.title).text = getString(R.string.home_history)
+        binding.sectionStarred.root.findViewById<TextView>(R.id.title).text = getString(R.string.home_starred)
 
-        binding.sectionSavedSearches.findViewById<android.view.View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToSavedSearches()) }
-        binding.sectionBookmarks.findViewById<android.view.View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToBookmarks()) }
-        binding.sectionHistory.findViewById<android.view.View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToHistory()) }
-        binding.sectionStarred.findViewById<android.view.View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToStarred()) }
+        binding.sectionSavedSearches.root.findViewById<View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToSavedSearches()) }
+        binding.sectionBookmarks.root.findViewById<View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToBookmarks()) }
+        binding.sectionHistory.root.findViewById<View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToHistory()) }
+        binding.sectionStarred.root.findViewById<View>(R.id.seeAll).setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToStarred()) }
 
         // Search box opens full search
         binding.editSearch.setOnFocusChangeListener { _, hasFocus -> if (hasFocus) findNavController().navigate(HomeFragmentDirections.actionHomeToSearch()) }
@@ -92,7 +93,7 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             vm.recentQueries.collectLatest {
                 binding.emptySavedSearches.isVisible = it.isEmpty()
-                binding.sectionSavedSearches.isVisible = it.isNotEmpty()
+                binding.sectionSavedSearches.root.isVisible = it.isNotEmpty()
                 binding.recentSearchesList.isVisible = it.isNotEmpty()
                 queriesAdapter.submitList(it)
             }
@@ -100,7 +101,7 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             vm.recentBookmarks.collectLatest {
                 binding.emptyBookmarks.isVisible = it.isEmpty()
-                binding.sectionBookmarks.isVisible = it.isNotEmpty()
+                binding.sectionBookmarks.root.isVisible = it.isNotEmpty()
                 binding.recentBookmarksList.isVisible = it.isNotEmpty()
                 bookmarksAdapter.submitList(it)
             }
@@ -108,7 +109,7 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             vm.recentHistory.collectLatest {
                 binding.emptyHistory.isVisible = it.isEmpty()
-                binding.sectionHistory.isVisible = it.isNotEmpty()
+                binding.sectionHistory.root.isVisible = it.isNotEmpty()
                 binding.recentHistoryList.isVisible = it.isNotEmpty()
                 historyAdapter.submitList(it)
             }
@@ -116,7 +117,7 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             vm.starredDocs.collectLatest {
                 binding.emptyStarred.isVisible = it.isEmpty()
-                binding.sectionStarred.isVisible = it.isNotEmpty()
+                binding.sectionStarred.root.isVisible = it.isNotEmpty()
                 binding.recentStarredList.isVisible = it.isNotEmpty()
                 starredAdapter.submitList(it)
             }

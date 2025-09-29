@@ -14,8 +14,13 @@ import io.github.stcksmsh.pravnik.domain.model.History
 import io.github.stcksmsh.pravnik.domain.model.SearchQuery
 
 class SimpleTextAdapter<T>(private val binder: (T) -> String, private val onClick: (T) -> Unit) : ListAdapter<T, SimpleTextAdapter<T>.VH>(object : DiffUtil.ItemCallback<T>() {
-    override fun areItemsTheSame(oldItem: T, newItem: T) = oldItem === newItem
-    override fun areContentsTheSame(oldItem: T, newItem: T) = oldItem == newItem
+    override fun areItemsTheSame(oldItem: T & Any, newItem: T & Any): Boolean {
+        return oldItem == newItem
+    }
+
+    override fun areContentsTheSame(oldItem: T & Any, newItem: T & Any): Boolean {
+        return oldItem == newItem
+    }
 }) {
     inner class VH(v: View) : RecyclerView.ViewHolder(v) {
         private val tv: TextView = v.findViewById(R.id.title)
@@ -33,6 +38,6 @@ class SimpleTextAdapter<T>(private val binder: (T) -> String, private val onClic
 object HomeBinders {
     val query: (SearchQuery) -> String = { it.query }
     val bookmark: (Bookmark) -> String = { it.title ?: it.unitAnchor }
-    val history: (History) -> String = { "${'$'}{it.docId}#${'$'}{it.unitAnchor}" }
+    val history: (History) -> String = { "${it.docId}#${it.unitAnchor}" }
     val document: (Document) -> String = { it.title }
 }

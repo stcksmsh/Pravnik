@@ -36,7 +36,7 @@ class HomeFragment : Fragment() {
                 binding.docsCount.text = getString(R.string.home_docs_count, docs.size)
             }
         }
-        binding.btnOpenSearch.setOnClickListener { findNavController().navigate(R.id.action_home_to_search) }
+        binding.btnOpenSearch.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToSearch()) }
         listOf(
             binding.chipConstitution to DocumentType.CONSTITUTION,
             binding.chipLaw to DocumentType.LAW,
@@ -46,16 +46,16 @@ class HomeFragment : Fragment() {
         ).forEach { (chip, type) ->
             chip.setOnCheckedChangeListener { _, _ -> vm.toggleType(type) }
         }
-        binding.btnStarred.setOnClickListener { findNavController().navigate(R.id.action_home_to_starred) }
-        binding.btnHistory.setOnClickListener { findNavController().navigate(R.id.action_home_to_history) }
-        binding.btnNotes.setOnClickListener { findNavController().navigate(R.id.action_home_to_notes) }
-        binding.btnBookmarks.setOnClickListener { findNavController().navigate(R.id.action_home_to_bookmarks) }
-        binding.btnCollections.setOnClickListener { findNavController().navigate(R.id.action_home_to_collections) }
-        binding.btnSavedSearches.setOnClickListener { findNavController().navigate(R.id.action_home_to_saved_searches) }
-        binding.btnImportExport.setOnClickListener { findNavController().navigate(R.id.action_home_to_import_export) }
-        binding.btnTemplates.setOnClickListener { findNavController().navigate(R.id.action_home_to_templates) }
-        binding.btnChecklists.setOnClickListener { findNavController().navigate(R.id.action_home_to_checklists) }
-        binding.btnDockets.setOnClickListener { findNavController().navigate(R.id.action_home_to_dockets) }
+        binding.btnStarred.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToStarred()) }
+        binding.btnHistory.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToHistory()) }
+        binding.btnNotes.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToNotes()) }
+        binding.btnBookmarks.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToBookmarks()) }
+        binding.btnCollections.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToCollections()) }
+        binding.btnSavedSearches.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToSavedSearches()) }
+        binding.btnImportExport.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToImportExport()) }
+        binding.btnTemplates.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToTemplates()) }
+        binding.btnChecklists.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToChecklists()) }
+        binding.btnDockets.setOnClickListener { findNavController().navigate(HomeFragmentDirections.actionHomeToDockets()) }
     }
 
     override fun onDestroyView() { super.onDestroyView(); _binding = null }

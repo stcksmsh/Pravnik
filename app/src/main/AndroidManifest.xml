@@ -12,6 +12,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Pravnik">
+
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="io.github.stcksmsh.pravnik.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="io.github.stcksmsh.pravnik.SeedInitializer"
+                android:value="androidx.startup" />
+        </provider>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

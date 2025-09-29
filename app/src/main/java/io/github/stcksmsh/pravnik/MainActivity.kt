@@ -48,6 +48,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         val navHost = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        return navHost.navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        return navHost.navController.navigateUp() || super.onSupportNavigateUp()
     }
 }

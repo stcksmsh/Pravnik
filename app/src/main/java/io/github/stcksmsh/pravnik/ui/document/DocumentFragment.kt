@@ -106,14 +106,6 @@ class DocumentFragment : Fragment() {
         val list = v.findViewById<android.widget.ListView>(R.id.outlineList)
         viewLifecycleOwner.lifecycleScope.launch {
             val labels = unitsRepo.listLabels(args.docId)
-    private fun toggleStar() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val docId = args.docId
-            val starred = documentsRepo.listStarred().any { it.id == docId }
-            if (starred) documentsRepo.unstar(docId) else documentsRepo.star(docId)
-            Toast.makeText(requireContext(), if (starred) R.string.unstarred else R.string.starred, Toast.LENGTH_SHORT).show()
-        }
-    }
 
             list.adapter = android.widget.ArrayAdapter(ctx, android.R.layout.simple_list_item_1, labels.map { it.label })
             list.setOnItemClickListener { _, _, position, _ ->
@@ -126,6 +118,14 @@ class DocumentFragment : Fragment() {
         dialog.show()
     }
 
+    private fun toggleStar() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val docId = args.docId
+            val starred = documentsRepo.listStarred().any { it.id == docId }
+            if (starred) documentsRepo.unstar(docId) else documentsRepo.star(docId)
+            Toast.makeText(requireContext(), if (starred) R.string.unstarred else R.string.starred, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun sampleText(): String = """
         Član 1

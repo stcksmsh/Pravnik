@@ -23,7 +23,6 @@ class DocketsFragment : Fragment() {
 
     @Inject lateinit var repo: DocketsRepo
 
-    private val adapter = DocketsAdapter()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSimpleListTabBinding.inflate(inflater, container, false)
@@ -33,6 +32,8 @@ class DocketsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
+        binding.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        val adapter = DocketsAdapter()
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             adapter.submitList(repo.listDockets())

@@ -32,15 +32,14 @@ class BookmarksFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
+        binding.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        val adapter = BookmarksAdapter { it2 ->
+            val action = io.github.stcksmsh.pravnik.NavGraphDirections.actionGlobalDocumentFragment(it2.docId, it2.unitAnchor)
+            findNavController().navigate(action)
+        }
+        binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
-            val items = bookmarksRepo.listBookmarks()
-            val titles = items.map { it.title ?: it.docId }
-            binding.list.adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, titles)
-            binding.list.setOnItemClickListener { _, _, pos, _ ->
-                val it = items[pos]
-                val action = io.github.stcksmsh.pravnik.NavGraphDirections.actionGlobalDocumentFragment(it.docId, it.unitAnchor)
-                findNavController().navigate(action)
-            }
+            adapter.submitList(bookmarksRepo.listBookmarks())
         }
     }
 

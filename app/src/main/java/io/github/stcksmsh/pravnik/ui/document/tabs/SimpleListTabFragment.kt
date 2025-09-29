@@ -4,9 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.stcksmsh.pravnik.R
 import io.github.stcksmsh.pravnik.domain.repo.DefinitionsRepo
@@ -37,27 +38,22 @@ class SimpleListTabFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val docId = requireArguments().getString("docId")!!
         val mode = requireArguments().getString("mode") // defs | tariffs | notes | meta | citations
-        val listView: android.widget.ListView = view.findViewById(R.id.list)
+        val recycler: RecyclerView = view.findViewById(R.id.list)
+        recycler.layoutManager = LinearLayoutManager(requireContext())
         val addFab: com.google.android.material.floatingactionbutton.FloatingActionButton = view.findViewById(R.id.addFab)
         addFab.visibility = if (mode == "notes") View.VISIBLE else View.GONE
         addFab.setOnClickListener { promptAddNote(docId) }
-        if (mode == "notes") {
-            listView.setOnItemClickListener { _, _, position, _ ->
-                val note = notes.getOrNull(position) ?: return@setOnItemClickListener
-                showNoteActions(docId, note)
-            }
-        }
         viewLifecycleOwner.lifecycleScope.launch {
             when (mode) {
                 "defs" -> {
                     val items = definitionsRepo.listForDoc(docId).map { it.term + ": " + it.text }
-                    listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+                    recycler.adapter = StringListAdapter(items)
                 }
                 "tariffs" -> {
                     val items = tariffsRepo.listForDoc(docId).map { (it.title ?: it.key) + (it.amount?.let { a -> " — $a" } ?: "") }
-                    listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+                    recycler.adapter = StringListAdapter(items)
                 }
-                "notes" -> loadNotes(docId, listView)
+                "notes" -> loadNotes(docId, recycler)
                 "meta" -> {
                     val case = caseMetaRepo.get(docId)
                     val practice = practiceMetaRepo.get(docId)
@@ -75,23 +71,22 @@ class SimpleListTabFragment : Fragment() {
                         )
                         else -> emptyList()
                     }
-                    listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+                    recycler.adapter = StringListAdapter(items)
                 }
                 "citations" -> {
                     val from = citatorRepo.listFrom(docId).map { "Cites → ${'$'}{it.toDocId}" }
                     val to = citatorRepo.listTo(docId).map { "Cited by ← ${'$'}{it.fromDocId}" }
-                    val items = from + to
-                    listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+                    recycler.adapter = StringListAdapter(from + to)
                 }
-                else -> listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, emptyList<String>())
+                else -> recycler.adapter = StringListAdapter(emptyList())
             }
 
         }
     }
     
-    private suspend fun loadNotes(docId: String, listView: android.widget.ListView) {
+    private suspend fun loadNotes(docId: String, recycler: RecyclerView) {
         notes = notesRepo.listForDoc(docId)
-        listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, notes.map { it.body })
+        recycler.adapter = NotesMiniAdapter(notes) { note -> showNoteActions(docId, note) }
     }
 
     private fun promptAddNote(docId: String) {
@@ -112,8 +107,8 @@ class SimpleListTabFragment : Fragment() {
                             body = body,
                             updatedAt = System.currentTimeMillis()
                         ))
-                        view?.findViewById<android.widget.ListView>(R.id.list)?.let { list ->
-                            loadNotes(docId, list)
+                        view?.findViewById<RecyclerView>(R.id.list)?.let { rv ->
+                            loadNotes(docId, rv)
                         }
                     }
                 }
@@ -133,8 +128,8 @@ class SimpleListTabFragment : Fragment() {
                     1 -> {
                         viewLifecycleOwner.lifecycleScope.launch {
                             notesRepo.delete(note.id)
-                            view?.findViewById<android.widget.ListView>(R.id.list)?.let { list ->
-                                loadNotes(docId, list)
+                            view?.findViewById<RecyclerView>(R.id.list)?.let { rv ->
+                                loadNotes(docId, rv)
                             }
                         }
                     }
@@ -155,8 +150,8 @@ class SimpleListTabFragment : Fragment() {
                 if (body.isNotEmpty()) {
                     viewLifecycleOwner.lifecycleScope.launch {
                         notesRepo.upsert(note.copy(body = body, updatedAt = System.currentTimeMillis()))
-                        view?.findViewById<android.widget.ListView>(R.id.list)?.let { list ->
-                            loadNotes(docId, list)
+                        view?.findViewById<RecyclerView>(R.id.list)?.let { rv ->
+                            loadNotes(docId, rv)
                         }
                     }
                 }
@@ -166,3 +161,36 @@ class SimpleListTabFragment : Fragment() {
             .show()
     }
 }
+
+class StringListAdapter(private val items: List<String>) : RecyclerView.Adapter<StringListAdapter.VH>() {
+    class VH(view: View) : RecyclerView.ViewHolder(view) {
+        private val t1: android.widget.TextView = view.findViewById(android.R.id.text1)
+        fun bind(text: String) { t1.text = text }
+    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val v = LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false)
+        return VH(v)
+    }
+    override fun getItemCount() = items.size
+    override fun onBindViewHolder(holder: VH, position: Int) { holder.bind(items[position]) }
+}
+
+class NotesMiniAdapter(
+    private val items: List<io.github.stcksmsh.pravnik.domain.model.Note>,
+    private val onClick: (io.github.stcksmsh.pravnik.domain.model.Note) -> Unit
+) : RecyclerView.Adapter<NotesMiniAdapter.VH>() {
+    class VH(view: View, private val onClick: (Int) -> Unit) : RecyclerView.ViewHolder(view) {
+        private val t1: android.widget.TextView = view.findViewById(android.R.id.text1)
+        fun bind(note: io.github.stcksmsh.pravnik.domain.model.Note) {
+            t1.text = note.body
+            itemView.setOnClickListener { onClick(bindingAdapterPosition) }
+        }
+    }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val v = LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false)
+        return VH(v) { pos -> onClick(items[pos]) }
+    }
+    override fun getItemCount() = items.size
+    override fun onBindViewHolder(holder: VH, position: Int) { holder.bind(items[position]) }
+}
+

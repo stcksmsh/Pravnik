@@ -23,7 +23,7 @@ class SavedSearchesFragment : Fragment() {
 
     @Inject lateinit var savedRepo: SavedSearchesRepo
 
-    private val adapter = SavedAdapter { /* TODO: run search later */ }
+    private val adapter = SavedAdapter()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSimpleListTabBinding.inflate(inflater, container, false)
@@ -33,6 +33,7 @@ class SavedSearchesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
+        binding.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             val items = savedRepo.listSaved()

@@ -23,7 +23,6 @@ class TemplatesFragment : Fragment() {
 
     @Inject lateinit var repo: TemplatesRepo
 
-    private val adapter = TemplatesAdapter()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSimpleListTabBinding.inflate(inflater, container, false)
@@ -33,6 +32,8 @@ class TemplatesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
+        binding.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        val adapter = TemplatesAdapter()
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             adapter.submitList(repo.listTemplates())

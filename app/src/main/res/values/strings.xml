@@ -41,4 +41,7 @@
     <string name="home_templates">Templates</string>
     <string name="home_checklists">Checklists</string>
     <string name="home_dockets">Dockets</string>
+    <string name="import_export_title">Import / Export Data</string>
+    <string name="export">Export</string>
+    <string name="import_">Import</string>
 </resources>

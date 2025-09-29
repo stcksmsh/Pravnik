@@ -23,7 +23,6 @@ class ChecklistsFragment : Fragment() {
 
     @Inject lateinit var repo: ChecklistsRepo
 
-    private val adapter = ChecklistsAdapter()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSimpleListTabBinding.inflate(inflater, container, false)
@@ -33,6 +32,8 @@ class ChecklistsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
+        binding.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        val adapter = ChecklistsAdapter()
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             adapter.submitList(repo.listChecklists())

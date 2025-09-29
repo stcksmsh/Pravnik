@@ -33,6 +33,9 @@ class StarredFragment : Fragment() {
         binding.list.layoutManager = LinearLayoutManager(requireContext())
         viewLifecycleOwner.lifecycleScope.launch {
             val docs = documentsRepo.listStarred()
+            binding.emptyView.visibility = if (docs.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (docs.isEmpty()) View.GONE else View.VISIBLE
+
             binding.list.adapter = object : RecyclerView.Adapter<SimpleDocVH>() {
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleDocVH {
                     val v = LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false)

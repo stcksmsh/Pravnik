@@ -36,7 +36,11 @@ class DocketsFragment : Fragment() {
         val adapter = DocketsAdapter()
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
-            adapter.submitList(repo.listDockets())
+            val items = repo.listDockets()
+            adapter.submitList(items)
+            binding.emptyView.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+
         }
     }
 

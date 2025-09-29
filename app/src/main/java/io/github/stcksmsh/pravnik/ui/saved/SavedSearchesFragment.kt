@@ -34,6 +34,9 @@ class SavedSearchesFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
         binding.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+            binding.emptyView.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             val items = savedRepo.listSaved()

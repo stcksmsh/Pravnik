@@ -1,105 +1,133 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
-
-    <com.google.android.material.chip.ChipGroup
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:singleSelection="false"
-        app:singleLine="true"
-        android:layout_marginBottom="8dp">
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipConstitution"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Constitution" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipLaw"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Laws" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipBylaw"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Bylaws" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipCase"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Court practice" />
-
-        <com.google.android.material.chip.Chip
-            android:id="@+id/chipPractice"
-            style="@style/Widget.MaterialComponents.Chip.Filter"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Legal practice" />
-    </com.google.android.material.chip.ChipGroup>
-
-    <com.google.android.material.textfield.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Search">
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/editSearch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:imeOptions="actionSearch"/>
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <Button android:id="@+id/btnStarred" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_starred" />
-        <Button android:id="@+id/btnHistory" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_history" />
-        <Button android:id="@+id/btnNotes" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_notes" />
-        <Button android:id="@+id/btnBookmarks" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_bookmarks" />
-        <Button android:id="@+id/btnCollections" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_collections" />
-        <Button android:id="@+id/btnSavedSearches" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_saved_searches" />
-        <Button android:id="@+id/btnImportExport" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_import_export" />
-        <Button android:id="@+id/btnTemplates" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_templates" />
-        <Button android:id="@+id/btnChecklists" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_checklists" />
-        <Button android:id="@+id/btnDockets" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/home_dockets" />
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/search_hint">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/editSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:imeOptions="actionSearch"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/typeChips"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:singleLine="true"/>
+        </LinearLayout>
+
+        <include
+            android:id="@+id/sectionSavedSearches"
+            layout="@layout/item_home_section_header" />
+
+        <TextView
+            android:id="@+id/emptySavedSearches"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="@string/empty_recent_searches"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recentSearchesList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:nestedScrollingEnabled="false"/>
+
+        <include
+            android:id="@+id/sectionBookmarks"
+            layout="@layout/item_home_section_header" />
+
+        <TextView
+            android:id="@+id/emptyBookmarks"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="@string/empty_bookmarks"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recentBookmarksList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:nestedScrollingEnabled="false"/>
+
+        <include
+            android:id="@+id/sectionHistory"
+            layout="@layout/item_home_section_header" />
+
+        <TextView
+            android:id="@+id/emptyHistory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="@string/empty_history"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recentHistoryList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:nestedScrollingEnabled="false"/>
+
+        <include
+            android:id="@+id/sectionStarred"
+            layout="@layout/item_home_section_header" />
+
+        <TextView
+            android:id="@+id/emptyStarred"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="8dp"
+            android:text="@string/empty_starred"
+            android:visibility="gone"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recentStarredList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:overScrollMode="never"
+            android:nestedScrollingEnabled="false"/>
+
+        <TextView
+            android:id="@+id/emptyView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="No data yet."
+            android:visibility="gone"/>
+
     </LinearLayout>
-
-    </com.google.android.material.textfield.TextInputLayout>
-
-    <Button
-        android:id="@+id/btnOpenSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Open Search"
-        android:layout_marginTop="8dp"/>
-
-    <TextView
-        android:id="@+id/docsCount"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:textStyle="bold"
-        android:text="Docs: 0"/>
-
-    <TextView
-        android:id="@+id/emptyView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="No documents yet."
-        android:visibility="gone"/>
-
-</LinearLayout>
+</ScrollView>

@@ -62,6 +62,10 @@
         android:id="@+id/searchFragment"
         android:name="io.github.stcksmsh.pravnik.ui.search.SearchFragment"
         android:label="Search" >
+        <argument
+            android:name="initialQuery"
+            app:argType="string"
+            android:defaultValue="" />
         <action
             android:id="@+id/action_search_to_document"
             app:destination="@id/documentFragment" />

@@ -54,6 +54,11 @@ class SearchFragment : Fragment() {
         binding.queryInput.addTextChangedListener { text ->
             scheduleSearch(text?.toString())
         }
+        val initial = arguments?.getString("initialQuery").orEmpty()
+        if (initial.isNotBlank()) {
+            binding.queryInput.setText(initial)
+            scheduleSearch(initial)
+        }
     }
 
     private fun scheduleSearch(raw: String?) {

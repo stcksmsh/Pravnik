@@ -37,6 +37,7 @@
     <string name="home_bookmarks">Bookmarks</string>
     <string name="home_collections">Collections</string>
     <string name="home_saved_searches">Saved searches</string>
+    <string name="home_recent_searches">Recent searches</string>
     <string name="home_import_export">Import/Export</string>
     <string name="home_templates">Templates</string>
     <string name="home_checklists">Checklists</string>
@@ -60,4 +61,12 @@
 
     <string name="content_desc_open_drawer">Open navigation menu</string>
     <string name="empty_list">Nothing here yet</string>
+
+    <string name="see_all">See all</string>
+    <string name="empty_recent_searches">No recent searches</string>
+    <string name="empty_bookmarks">No bookmarks yet</string>
+    <string name="empty_history">No recent history</string>
+    <string name="empty_starred">No starred documents</string>
 </resources>
+
+

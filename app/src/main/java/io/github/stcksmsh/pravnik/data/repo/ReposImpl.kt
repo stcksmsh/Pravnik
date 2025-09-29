@@ -212,6 +212,11 @@ class PracticeMetaRepoImpl(private val db: AppDb) : PracticeMetaRepo {
     }
 }
 
+class SearchQueriesRepoImpl(private val db: AppDb) : SearchQueriesRepo {
+    override suspend fun recent(limit: Int) = withContext(Dispatchers.IO) { db.searchQueryDao().recent(limit).map { it.toDomain() } }
+    override suspend fun insert(item: SearchQuery) = withContext(Dispatchers.IO) { db.searchQueryDao().insert(item.toEntity()) }
+}
+
 class CitatorRepoImpl(private val db: AppDb) : CitatorRepo {
     override suspend fun listFrom(docId: String) = withContext(Dispatchers.IO) {
         db.citationDao().listFrom(docId).map { it.toDomain() }

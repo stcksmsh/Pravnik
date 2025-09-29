@@ -23,10 +23,6 @@ class NotesListFragment : Fragment() {
 
     @Inject lateinit var notesRepo: NotesRepo
 
-    private val adapter = NotesAdapter { item ->
-        val action = NotesListFragmentDirections.actionHomeToDocument(item.docId, item.unitAnchor)
-        findNavController().navigate(action)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSimpleListTabBinding.inflate(inflater, container, false)
@@ -36,10 +32,15 @@ class NotesListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
-        binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             val notes = notesRepo.listAll()
-            adapter.submitList(notes)
+            val titles = notes.map { it.title ?: it.body.take(40) }
+            binding.list.adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, titles)
+            binding.list.setOnItemClickListener { _, _, pos, _ ->
+                val it = notes[pos]
+                val action = io.github.stcksmsh.pravnik.NavGraphDirections.actionGlobalDocumentFragment(it.docId, it.unitAnchor)
+                findNavController().navigate(action)
+            }
         }
     }
 

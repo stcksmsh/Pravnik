@@ -25,10 +25,6 @@ class HistoryFragment : Fragment() {
     @Inject lateinit var historyRepo: HistoryRepo
     @Inject lateinit var documentsRepo: DocumentsRepo
 
-    private val adapter = HistoryAdapter { item ->
-        val action = HistoryFragmentDirections.actionHomeToDocument(item.docId, item.unitAnchor)
-        findNavController().navigate(action)
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSimpleListTabBinding.inflate(inflater, container, false)
@@ -38,10 +34,15 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
-        binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             val items = historyRepo.recent(100)
-            adapter.submitList(items)
+            val titles = items.map { it.docId }
+            binding.list.adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, titles)
+            binding.list.setOnItemClickListener { _, _, pos, _ ->
+                val item = items[pos]
+                val action = io.github.stcksmsh.pravnik.NavGraphDirections.actionGlobalDocumentFragment(item.docId, item.unitAnchor)
+                findNavController().navigate(action)
+            }
         }
     }
 

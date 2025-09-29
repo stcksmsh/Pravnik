@@ -16,6 +16,8 @@ import com.google.android.material.chip.Chip
 import io.github.stcksmsh.pravnik.R
 import io.github.stcksmsh.pravnik.databinding.FragmentSearchBinding
 import io.github.stcksmsh.pravnik.domain.model.DocumentType
+import androidx.navigation.fragment.findNavController
+import io.github.stcksmsh.pravnik.domain.repo.DocumentsRepo
 import io.github.stcksmsh.pravnik.domain.repo.SearchRepo
 import io.github.stcksmsh.pravnik.domain.repo.SearchFilters
 import io.github.stcksmsh.pravnik.ui.util.RenderUtils
@@ -31,8 +33,13 @@ class SearchFragment : Fragment() {
     private val binding get() = _binding!!
 
     @Inject lateinit var searchRepo: SearchRepo
+    @Inject lateinit var documentsRepo: DocumentsRepo
 
-    private val adapter = ResultsAdapter()
+    private val adapter = ResultsAdapter { row ->
+        // Navigate to document view on click
+        val action = SearchFragmentDirections.actionSearchFragmentToDocumentFragment(row.docId, row.anchor)
+        findNavController().navigate(action)
+    }
     private var job: Job? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -57,7 +64,7 @@ class SearchFragment : Fragment() {
             if (q.isBlank()) { adapter.submitList(emptyList()); return@launch }
             val filters = collectFilters()
             val res = searchRepo.search(q, filters)
-            adapter.submitList(res.rows.map { row -> UiRow(row.docTitle, row.unitTitle, row.snippetHtml, q) })
+            adapter.submitList(res.rows.map { row -> UiRow(row.docId, row.unitAnchor, row.docTitle, row.unitTitle, row.snippetHtml, q) })
             renderFacets(res, filters)
         }
     }
@@ -116,25 +123,26 @@ class SearchFragment : Fragment() {
         ChipGroupUpdater(binding.practiceYearChips, res.facets.practiceYears.keys.sortedDescending().map { it.toString() })
     }
 
-    data class UiRow(val docTitle: String, val unitTitle: String?, val snippet: String, val query: String)
+    data class UiRow(val docId: String, val anchor: String, val docTitle: String, val unitTitle: String?, val snippet: String, val query: String)
 
-    class ResultsAdapter : ListAdapter<UiRow, ResultsVH>(object : DiffUtil.ItemCallback<UiRow>() {
+    class ResultsAdapter(private val onClick: (UiRow) -> Unit) : ListAdapter<UiRow, ResultsVH>(object : DiffUtil.ItemCallback<UiRow>() {
         override fun areItemsTheSame(oldItem: UiRow, newItem: UiRow) = oldItem === newItem
         override fun areContentsTheSame(oldItem: UiRow, newItem: UiRow) = oldItem == newItem
     }) {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ResultsVH {
             val v = LayoutInflater.from(parent.context).inflate(R.layout.item_search_row, parent, false)
-            return ResultsVH(v)
+            return ResultsVH(v, onClick)
         }
 
         override fun onBindViewHolder(holder: ResultsVH, position: Int) = holder.bind(getItem(position))
     }
 
-    class ResultsVH(view: View) : RecyclerView.ViewHolder(view) {
+    class ResultsVH(view: View, private val onClick: (UiRow) -> Unit) : RecyclerView.ViewHolder(view) {
         private val title: android.widget.TextView = view.findViewById(R.id.title)
         private val snippet: android.widget.TextView = view.findViewById(R.id.snippet)
         init { snippet.movementMethod = LinkMovementMethod.getInstance() }
         fun bind(item: UiRow) {
+            itemView.setOnClickListener { onClick(item) }
             title.text = item.unitTitle ?: item.docTitle
             val tokens = RenderUtils.tokenizeQuery(item.query)
             val highlighted = RenderUtils.highlightQuery(
@@ -143,7 +151,7 @@ class SearchFragment : Fragment() {
                 0x66FFEB3B.toInt()
             )
             snippet.text = RenderUtils.applyClickableArticleRefs(highlighted.toString()) { number ->
-                object : android.text.style.ClickableSpan() { override fun onClick(widget: View) { /* TODO: navigate */ } }
+                object : android.text.style.ClickableSpan() { override fun onClick(widget: View) { /* in-snippet ref click noop here */ } }
             }
         }
     }

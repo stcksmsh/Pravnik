@@ -36,7 +36,11 @@ class CollectionsFragment : Fragment() {
         val adapter = CollectionsAdapter { /* TODO: open collection details */ }
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
-            adapter.submitList(collectionsRepo.listCollections())
+            val items = collectionsRepo.listCollections()
+            adapter.submitList(items)
+            binding.emptyView.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+
         }
     }
 

@@ -36,7 +36,11 @@ class ChecklistsFragment : Fragment() {
         val adapter = ChecklistsAdapter()
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
-            adapter.submitList(repo.listChecklists())
+            val items = repo.listChecklists()
+            adapter.submitList(items)
+            binding.emptyView.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+
         }
     }
 

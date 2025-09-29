@@ -39,7 +39,11 @@ class NotesListFragment : Fragment() {
         }
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
-            adapter.submitList(notesRepo.listAll())
+            val items = notesRepo.listAll()
+            adapter.submitList(items)
+            binding.emptyView.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
+
         }
     }
 

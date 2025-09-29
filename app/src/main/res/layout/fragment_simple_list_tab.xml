@@ -9,8 +9,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="72dp"
-        />
+        android:paddingBottom="72dp" />
+
+    <TextView
+        android:id="@+id/emptyView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/empty_list"
+        android:visibility="gone" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addFab"
@@ -21,7 +28,6 @@
         android:contentDescription="@string/add_note"
         app:srcCompat="@android:drawable/ic_input_add"
         android:visibility="gone"
-        app:layout_anchor="@id/list"
-        />
+        app:layout_anchor="@id/list" />
 
 </FrameLayout>

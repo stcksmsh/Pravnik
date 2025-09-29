@@ -38,6 +38,8 @@ class SavedSearchesFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val items = savedRepo.listSaved()
             adapter.submitList(items)
+            binding.emptyView.visibility = if (items.isEmpty()) View.VISIBLE else View.GONE
+            binding.list.visibility = if (items.isEmpty()) View.GONE else View.VISIBLE
         }
     }
 

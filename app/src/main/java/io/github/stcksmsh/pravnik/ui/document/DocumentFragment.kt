@@ -53,16 +53,18 @@ class DocumentFragment : Fragment() {
             getString(R.string.tab_meta),
             getString(R.string.tab_citations),
         )
+        val docId = args.docId
+        val anchor = args.anchor
         binding.viewPager.adapter = object : FragmentStateAdapter(this) {
             override fun getItemCount() = titles.size
             override fun createFragment(position: Int): Fragment {
                 return when (position) {
-                    0 -> ReadTab()
-                    1 -> SimpleListTab()
-                    2 -> SimpleListTab()
-                    3 -> SimpleListTab()
-                    4 -> SimpleListTab()
-                    else -> SimpleListTab()
+                    0 -> ReadTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("anchor", anchor) } }
+                    1 -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "defs") } }
+                    2 -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "tariffs") } }
+                    3 -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "notes") } }
+                    4 -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "meta") } }
+                    else -> SimpleListTabFragment().apply { arguments = Bundle().apply { putString("docId", docId); putString("mode", "citations") } }
                 }
             }
         }

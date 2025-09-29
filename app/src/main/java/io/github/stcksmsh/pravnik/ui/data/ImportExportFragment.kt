@@ -46,7 +46,7 @@ class ImportExportFragment : Fragment() {
             val data = exportUserData()
             file.writeText(data)
             withContext(Dispatchers.Main) {
-                binding.tvStatus.text = "Exported to: ${'$'}{file.absolutePath}"
+                binding.tvStatus.text = "Exported to:  ${file.absolutePath}"
             }
         }
     }
@@ -59,7 +59,7 @@ class ImportExportFragment : Fragment() {
                 val json = file.readText()
                 importUserData(json)
                 withContext(Dispatchers.Main) {
-                    binding.tvStatus.text = "Imported from: ${'$'}{file.absolutePath} (size ${'$'}{json.length} bytes)"
+                    binding.tvStatus.text = "Imported from:  ${file.absolutePath} (size  ${json.length} bytes)"
                 }
             } else {
                 withContext(Dispatchers.Main) {

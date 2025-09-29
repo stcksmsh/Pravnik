@@ -59,23 +59,23 @@ class SimpleListTabFragment : Fragment() {
                     val practice = practiceMetaRepo.get(docId)
                     val items = when {
                         case != null -> listOfNotNull(
-                            "Court: ${'$'}{case.court}",
-                            "Case no: ${'$'}{case.caseNumber}",
-                            "Decided: ${'$'}{case.decidedOn}",
-                            "Outcome: ${'$'}{case.outcome}",
+                            "Court:  ${case.court}",
+                            "Case no:  ${case.caseNumber}",
+                            "Decided:  ${case.decidedOn}",
+                            "Outcome:  ${case.outcome}",
                         )
                         practice != null -> listOfNotNull(
-                            "Authority: ${'$'}{practice.authority}",
-                            "Doc no: ${'$'}{practice.documentNumber}",
-                            "Issued: ${'$'}{practice.issuedOn}",
+                            "Authority:  ${practice.authority}",
+                            "Doc no:  ${practice.refNumber}",
+                            "Issued:  ${practice.issuedOn}",
                         )
                         else -> emptyList()
                     }
                     recycler.adapter = StringListAdapter(items)
                 }
                 "citations" -> {
-                    val from = citatorRepo.listFrom(docId).map { "Cites → ${'$'}{it.toDocId}" }
-                    val to = citatorRepo.listTo(docId).map { "Cited by ← ${'$'}{it.fromDocId}" }
+                    val from = citatorRepo.listFrom(docId).map { "Cites →  ${it.toDocId}" }
+                    val to = citatorRepo.listTo(docId).map { "Cited by ←  ${it.fromDocId}" }
                     recycler.adapter = StringListAdapter(from + to)
                 }
                 else -> recycler.adapter = StringListAdapter(emptyList())

@@ -73,7 +73,7 @@ class SimpleListTabFragment : Fragment() {
 
         }
     }
-    
+
     private fun promptAddNote(docId: String) {
         val ctx = requireContext()
         val input = android.widget.EditText(ctx).apply { hint = getString(R.string.note_hint) }

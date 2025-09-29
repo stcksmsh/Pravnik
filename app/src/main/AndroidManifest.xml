@@ -19,6 +19,9 @@
             android:exported="false"
             tools:node="merge">
             <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                tools:node="remove" />
+            <meta-data
                 android:name="io.github.stcksmsh.pravnik.SeedInitializer"
                 android:value="androidx.startup" />
         </provider>

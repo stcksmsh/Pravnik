@@ -33,6 +33,7 @@ class SavedSearchesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
+        binding.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
             val items = savedRepo.listSaved()

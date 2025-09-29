@@ -34,15 +34,14 @@ class HistoryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.addFab.visibility = View.GONE
+        binding.list.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        val adapter = HistoryAdapter { item ->
+            val action = io.github.stcksmsh.pravnik.NavGraphDirections.actionGlobalDocumentFragment(item.docId, item.unitAnchor)
+            findNavController().navigate(action)
+        }
+        binding.list.adapter = adapter
         viewLifecycleOwner.lifecycleScope.launch {
-            val items = historyRepo.recent(100)
-            val titles = items.map { it.docId }
-            binding.list.adapter = android.widget.ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, titles)
-            binding.list.setOnItemClickListener { _, _, pos, _ ->
-                val item = items[pos]
-                val action = io.github.stcksmsh.pravnik.NavGraphDirections.actionGlobalDocumentFragment(item.docId, item.unitAnchor)
-                findNavController().navigate(action)
-            }
+            adapter.submitList(historyRepo.recent(100))
         }
     }
 

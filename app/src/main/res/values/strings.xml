@@ -1,6 +1,21 @@
 <resources>
 
     <string name="home_docs_count">Docs: %1$d</string>
+    <string name="search_hint">Search</string>
+    <string name="facet_type">Type</string>
+    <string name="facet_docs">Documents</string>
+    <string name="facet_courts">Courts</string>
+    <string name="facet_case_years">Case Years</string>
+    <string name="facet_authorities">Authorities</string>
+    <string name="facet_practice_years">Practice Years</string>
+
+    <string name="outline">Outline</string>
+    <string name="tab_read">Read</string>
+    <string name="tab_definitions">Definitions</string>
+    <string name="tab_tariffs">Tariffs</string>
+    <string name="tab_notes">Notes</string>
+    <string name="tab_meta">Meta</string>
+    <string name="tab_citations">Citations</string>
 
     <string name="app_name">Pravnik</string>
 </resources>

@@ -22,5 +22,11 @@
     <string name="star">Star</string>
     <string name="star_doc">Star this document</string>
 
+    <string name="add_note">Add note</string>
+    <string name="edit">Edit</string>
+    <string name="delete">Delete</string>
+    <string name="note_hint">Type your note…</string>
+    <string name="save">Save</string>
+
     <string name="app_name">Pravnik</string>
 </resources>

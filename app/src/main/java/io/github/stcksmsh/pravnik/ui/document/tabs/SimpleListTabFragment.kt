@@ -36,6 +36,9 @@ class SimpleListTabFragment : Fragment() {
         val docId = requireArguments().getString("docId")!!
         val mode = requireArguments().getString("mode") // defs | tariffs | notes | meta | citations
         val listView: android.widget.ListView = view.findViewById(R.id.list)
+        val addFab: com.google.android.material.floatingactionbutton.FloatingActionButton = view.findViewById(R.id.addFab)
+        if (mode == "notes") addFab.visibility = View.VISIBLE else addFab.visibility = View.GONE
+        addFab.setOnClickListener { promptAddNote(docId) }
         viewLifecycleOwner.lifecycleScope.launch {
             val items: List<String> = when (mode) {
                 "defs" -> definitionsRepo.listForDoc(docId).map { it.term + ": " + it.text }
@@ -67,6 +70,37 @@ class SimpleListTabFragment : Fragment() {
                 else -> emptyList()
             }
             listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+    private fun promptAddNote(docId: String) {
+        val ctx = requireContext()
+        val input = android.widget.EditText(ctx).apply { hint = getString(R.string.note_hint) }
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.add_note)
+            .setView(input)
+            .setPositiveButton(R.string.save) { d, _ ->
+                val body = input.text?.toString()?.trim().orEmpty()
+                if (body.isNotEmpty()) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        notesRepo.upsert(io.github.stcksmsh.pravnik.domain.model.Note(
+                            id = 0,
+                            docId = docId,
+                            unitAnchor = "", // TODO: wire current anchor if available
+                            title = null,
+                            body = body,
+                            updatedAt = System.currentTimeMillis()
+                        ))
+                        // refresh
+                        view?.findViewById<android.widget.ListView>(R.id.list)?.let { list ->
+                            val items = notesRepo.listForDoc(docId).map { it.body }
+                            list.adapter = android.widget.ArrayAdapter(ctx, android.R.layout.simple_list_item_1, items)
+                        }
+                    }
+                }
+                d.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
         }
     }
 }

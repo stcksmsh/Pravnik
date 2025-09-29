@@ -31,23 +31,37 @@ class SimpleListTabFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_simple_list_tab, container, false)
     }
 
+    private var notes: List<io.github.stcksmsh.pravnik.domain.model.Note> = emptyList()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val docId = requireArguments().getString("docId")!!
         val mode = requireArguments().getString("mode") // defs | tariffs | notes | meta | citations
         val listView: android.widget.ListView = view.findViewById(R.id.list)
         val addFab: com.google.android.material.floatingactionbutton.FloatingActionButton = view.findViewById(R.id.addFab)
-        if (mode == "notes") addFab.visibility = View.VISIBLE else addFab.visibility = View.GONE
+        addFab.visibility = if (mode == "notes") View.VISIBLE else View.GONE
         addFab.setOnClickListener { promptAddNote(docId) }
+        if (mode == "notes") {
+            listView.setOnItemClickListener { _, _, position, _ ->
+                val note = notes.getOrNull(position) ?: return@setOnItemClickListener
+                showNoteActions(docId, note)
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch {
-            val items: List<String> = when (mode) {
-                "defs" -> definitionsRepo.listForDoc(docId).map { it.term + ": " + it.text }
-                "tariffs" -> tariffsRepo.listForDoc(docId).map { (it.title ?: it.key) + (it.amount?.let { a -> " — $a" } ?: "") }
-                "notes" -> notesRepo.listForDoc(docId).map { it.body }
+            when (mode) {
+                "defs" -> {
+                    val items = definitionsRepo.listForDoc(docId).map { it.term + ": " + it.text }
+                    listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+                }
+                "tariffs" -> {
+                    val items = tariffsRepo.listForDoc(docId).map { (it.title ?: it.key) + (it.amount?.let { a -> " — $a" } ?: "") }
+                    listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
+                }
+                "notes" -> loadNotes(docId, listView)
                 "meta" -> {
                     val case = caseMetaRepo.get(docId)
                     val practice = practiceMetaRepo.get(docId)
-                    when {
+                    val items = when {
                         case != null -> listOfNotNull(
                             "Court: ${'$'}{case.court}",
                             "Case no: ${'$'}{case.caseNumber}",
@@ -61,17 +75,23 @@ class SimpleListTabFragment : Fragment() {
                         )
                         else -> emptyList()
                     }
+                    listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
                 }
                 "citations" -> {
-                    val from = citatorRepo.listFrom(docId).map { "Cites → ${'$'}{it.toId}" }
-                    val to = citatorRepo.listTo(docId).map { "Cited by ← ${'$'}{it.fromId}" }
-                    from + to
+                    val from = citatorRepo.listFrom(docId).map { "Cites → ${'$'}{it.toDocId}" }
+                    val to = citatorRepo.listTo(docId).map { "Cited by ← ${'$'}{it.fromDocId}" }
+                    val items = from + to
+                    listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
                 }
-                else -> emptyList()
+                else -> listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, emptyList<String>())
             }
-            listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, items)
 
         }
+    }
+    
+    private suspend fun loadNotes(docId: String, listView: android.widget.ListView) {
+        notes = notesRepo.listForDoc(docId)
+        listView.adapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, notes.map { it.body })
     }
 
     private fun promptAddNote(docId: String) {
@@ -87,15 +107,56 @@ class SimpleListTabFragment : Fragment() {
                         notesRepo.upsert(io.github.stcksmsh.pravnik.domain.model.Note(
                             id = 0,
                             docId = docId,
-                            unitAnchor = "", // TODO: wire current anchor if available
+                            unitAnchor = "",
                             title = null,
                             body = body,
                             updatedAt = System.currentTimeMillis()
                         ))
-                        // refresh
                         view?.findViewById<android.widget.ListView>(R.id.list)?.let { list ->
-                            val items = notesRepo.listForDoc(docId).map { it.body }
-                            list.adapter = android.widget.ArrayAdapter(ctx, android.R.layout.simple_list_item_1, items)
+                            loadNotes(docId, list)
+                        }
+                    }
+                }
+                d.dismiss()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun showNoteActions(docId: String, note: io.github.stcksmsh.pravnik.domain.model.Note) {
+        val ctx = requireContext()
+        val options = arrayOf(getString(R.string.edit), getString(R.string.delete))
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+            .setItems(options) { d, which ->
+                when (which) {
+                    0 -> promptEditNote(docId, note)
+                    1 -> {
+                        viewLifecycleOwner.lifecycleScope.launch {
+                            notesRepo.delete(note.id)
+                            view?.findViewById<android.widget.ListView>(R.id.list)?.let { list ->
+                                loadNotes(docId, list)
+                            }
+                        }
+                    }
+                }
+                d.dismiss()
+            }
+            .show()
+    }
+
+    private fun promptEditNote(docId: String, note: io.github.stcksmsh.pravnik.domain.model.Note) {
+        val ctx = requireContext()
+        val input = android.widget.EditText(ctx).apply { setText(note.body) }
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(ctx)
+            .setTitle(R.string.edit)
+            .setView(input)
+            .setPositiveButton(R.string.save) { d, _ ->
+                val body = input.text?.toString()?.trim().orEmpty()
+                if (body.isNotEmpty()) {
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        notesRepo.upsert(note.copy(body = body, updatedAt = System.currentTimeMillis()))
+                        view?.findViewById<android.widget.ListView>(R.id.list)?.let { list ->
+                            loadNotes(docId, list)
                         }
                     }
                 }

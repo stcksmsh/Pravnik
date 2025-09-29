@@ -20,6 +20,8 @@ import io.github.stcksmsh.pravnik.domain.repo.DefinitionsRepo
 import io.github.stcksmsh.pravnik.domain.repo.TariffsRepo
 import io.github.stcksmsh.pravnik.domain.repo.UnitsRepo
 import io.github.stcksmsh.pravnik.domain.repo.DocumentsRepo
+import io.github.stcksmsh.pravnik.domain.repo.HistoryRepo
+import io.github.stcksmsh.pravnik.domain.model.History
 import io.github.stcksmsh.pravnik.ui.document.tabs.ReadTabFragment
 import io.github.stcksmsh.pravnik.ui.document.tabs.SimpleListTabFragment
 import io.github.stcksmsh.pravnik.ui.util.RenderUtils
@@ -37,6 +39,7 @@ class DocumentFragment : Fragment() {
     @Inject lateinit var definitionsRepo: DefinitionsRepo
     @Inject lateinit var tariffsRepo: TariffsRepo
     @Inject lateinit var documentsRepo: DocumentsRepo
+    @Inject lateinit var historyRepo: HistoryRepo
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDocumentBinding.inflate(inflater, container, false)
@@ -44,12 +47,18 @@ class DocumentFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        binding.starBtn.setOnClickListener { toggleStar() }
+
         super.onViewCreated(view, savedInstanceState)
         setupTabs()
         // Update title from document
         viewLifecycleOwner.lifecycleScope.launch {
             val doc = documentsRepo.get(args.docId)
             binding.title.text = doc?.title ?: args.docId
+        }
+        // Insert into history
+        viewLifecycleOwner.lifecycleScope.launch {
+            historyRepo.insert(History(id = 0, docId = args.docId, unitAnchor = args.anchor ?: "", visitedAt = System.currentTimeMillis()))
         }
         parentFragmentManager.setFragmentResultListener("doc_anchor", viewLifecycleOwner) { _, bundle ->
             val anchor = bundle.getString("anchor").orEmpty()
@@ -97,6 +106,15 @@ class DocumentFragment : Fragment() {
         val list = v.findViewById<android.widget.ListView>(R.id.outlineList)
         viewLifecycleOwner.lifecycleScope.launch {
             val labels = unitsRepo.listLabels(args.docId)
+    private fun toggleStar() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val docId = args.docId
+            val starred = documentsRepo.listStarred().any { it.id == docId }
+            if (starred) documentsRepo.unstar(docId) else documentsRepo.star(docId)
+            Toast.makeText(requireContext(), if (starred) R.string.unstarred else R.string.starred, Toast.LENGTH_SHORT).show()
+        }
+    }
+
             list.adapter = android.widget.ArrayAdapter(ctx, android.R.layout.simple_list_item_1, labels.map { it.label })
             list.setOnItemClickListener { _, _, position, _ ->
                 val anchor = labels[position].anchor
